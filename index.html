@@ -3,16 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ЗомбиГлобал</title>
+  <title>ЗомбиГлобал — Arcade Outbreak</title>
   <style>
     :root{
-      --bg:#070a10;
-      --ink:#e9fff2;
-      --muted:rgba(233,255,242,.70);
-      --g:#5CFF7A;
-      --c:#37E6FF;
-      --p:#B36BFF;
-      --y:#FFD66B;
+      --ink:#E9FFF2;
+      --mut:rgba(233,255,242,.72);
+      --stroke:rgba(255,255,255,.10);
+
+      --g:#45FF75;
+      --b:#2FA9FF;
+      --p:#B16BFF;
+      --y:#FFB94A;
+
+      --panel:rgba(6,10,12,.58);
+      --panel2:rgba(9,14,16,.70);
+
       --r:18px;
       --shadow:0 22px 90px rgba(0,0,0,.55);
       --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
@@ -22,363 +27,455 @@
     html,body{height:100%}
     body{
       margin:0; color:var(--ink); font-family:var(--ui);
-      background: radial-gradient(1200px 900px at 20% 15%, rgba(92,255,122,.14), transparent 60%),
-                  radial-gradient(900px 650px at 80% 25%, rgba(55,230,255,.12), transparent 62%),
-                  radial-gradient(900px 650px at 55% 85%, rgba(179,107,255,.10), transparent 62%),
-                  linear-gradient(180deg,#070a10,#05070c);
-      overflow:hidden;
+      background:#05070B;
+      overflow-x:hidden;
     }
 
-    /* ===== BACKGROUND (game vibe) ===== */
+    /* ===== background (put bg.jpg next to index.html) ===== */
     .bg{
       position:fixed; inset:0; z-index:0;
-      display:grid; place-items:center;
       background:
-        radial-gradient(900px 520px at 50% 30%, rgba(92,255,122,.16), transparent 60%),
-        radial-gradient(740px 420px at 55% 75%, rgba(55,230,255,.12), transparent 65%),
-        radial-gradient(900px 520px at 40% 85%, rgba(179,107,255,.10), transparent 65%);
+        linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.70)),
+        radial-gradient(1100px 700px at 50% 22%, rgba(69,255,117,.16), transparent 60%),
+        radial-gradient(900px 650px at 82% 22%, rgba(47,169,255,.14), transparent 60%),
+        radial-gradient(900px 650px at 35% 80%, rgba(177,107,255,.12), transparent 62%),
+        url("bg.jpg") center/cover no-repeat;
+      filter: saturate(1.05) contrast(1.05) brightness(.75);
+      transform: scale(1.03);
     }
-    .bg video, .bg img{
-      position:absolute; inset:0; width:100%; height:100%;
-      object-fit:cover;
-      transform:scale(1.05);
-      filter:saturate(1.05) contrast(1.05) brightness(.72);
-      opacity:.95;
-    }
-    .bg::after{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(1200px 800px at 50% 20%, rgba(0,0,0,.05), rgba(0,0,0,.55) 62%),
-        linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.60));
-      pointer-events:none;
-    }
-    .noise{
+    .vignette{
       position:fixed; inset:0; z-index:1; pointer-events:none;
-      opacity:.10; mix-blend-mode:overlay;
+      background:
+        radial-gradient(1200px 800px at 50% 20%, rgba(0,0,0,.00), rgba(0,0,0,.55) 62%),
+        linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.55));
+    }
+    .scan{
+      position:fixed; inset:0; z-index:2; pointer-events:none;
+      opacity:.12; mix-blend-mode:overlay;
       background: repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px, transparent 2px, transparent 4px);
     }
     .sparks{
-      position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.55;
+      position:fixed; inset:0; z-index:2; pointer-events:none;
+      opacity:.55;
       background:
-        radial-gradient(2px 2px at 12% 28%, rgba(92,255,122,.75), transparent 60%),
-        radial-gradient(2px 2px at 26% 62%, rgba(55,230,255,.70), transparent 60%),
-        radial-gradient(2px 2px at 72% 22%, rgba(179,107,255,.70), transparent 60%),
-        radial-gradient(2px 2px at 86% 58%, rgba(255,214,107,.70), transparent 60%),
-        radial-gradient(2px 2px at 44% 78%, rgba(92,255,122,.65), transparent 60%);
-      filter: blur(.2px);
+        radial-gradient(2px 2px at 12% 28%, rgba(69,255,117,.9), transparent 60%),
+        radial-gradient(2px 2px at 26% 62%, rgba(47,169,255,.85), transparent 60%),
+        radial-gradient(2px 2px at 72% 22%, rgba(177,107,255,.85), transparent 60%),
+        radial-gradient(2px 2px at 86% 58%, rgba(255,185,74,.85), transparent 60%),
+        radial-gradient(2px 2px at 44% 78%, rgba(69,255,117,.8), transparent 60%);
       animation: float 6s ease-in-out infinite alternate;
     }
     @keyframes float{ from{transform:translateY(0)} to{transform:translateY(-10px)} }
 
-    /* ===== LAYOUT ===== */
+    /* ===== layout ===== */
     .wrap{
-      position:relative; z-index:2;
-      height:100%; width:min(1100px, calc(100% - 24px));
-      margin:0 auto; padding:18px 0 22px;
-      display:flex; flex-direction:column; gap:14px;
+      position:relative; z-index:3;
+      width:min(1180px, calc(100% - 28px));
+      margin:0 auto;
+      padding: 14px 0 18px;
     }
 
-    /* Top HUD */
-    .hud{
-      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-      padding:12px 14px;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(7,10,16,.62);
-      backdrop-filter: blur(10px);
+    /* ===== top banner ===== */
+    .banner{
+      border-radius: 22px;
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(7,12,14,.70), rgba(6,10,12,.40));
       box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
     }
-    .brand{display:flex; align-items:center; gap:12px}
-    .logo{
-      width:44px;height:44px;border-radius:14px;
+    .banner::before{
+      content:"";
+      position:absolute; inset:0;
       background:
-        radial-gradient(circle at 35% 35%, rgba(92,255,122,.95), rgba(92,255,122,.12) 52%, transparent 62%),
-        radial-gradient(circle at 70% 65%, rgba(55,230,255,.30), transparent 60%),
-        linear-gradient(180deg, rgba(10,16,14,.9), rgba(6,8,12,.9));
-      border:1px solid rgba(92,255,122,.25);
-      box-shadow: 0 0 0 1px rgba(55,230,255,.10) inset;
+        linear-gradient(90deg, transparent, rgba(69,255,117,.10), transparent),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0, rgba(255,255,255,.02) 1px, transparent 2px, transparent 18px);
+      opacity:.55;
+      pointer-events:none;
+      transform: skewY(-1.1deg);
     }
-    .title{line-height:1}
-    .title .t{font-family:var(--mono); letter-spacing:.10em; font-weight:900; text-transform:uppercase; font-size:14px}
-    .title .s{font-family:var(--mono); letter-spacing:.06em; font-size:11px; color:var(--muted); margin-top:4px}
-
-    .hudRight{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .bannerTop{
+      position:relative;
+      padding: 10px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .bannerTop .mini{
+      font-family:var(--mono);
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-weight:900;
+      font-size:12px;
+      color: rgba(233,255,242,.82);
+    }
+    .hudMini{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      font-family:var(--mono); font-size:12px; letter-spacing:.06em;
+    }
     .pill{
       display:inline-flex; align-items:center; gap:8px;
-      padding:9px 10px; border-radius:999px;
+      padding:8px 10px;
+      border-radius:999px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(6,8,12,.55);
-      font-family:var(--mono); font-size:12px; color:rgba(233,255,242,.9);
+      background: rgba(6,10,12,.45);
+      color: rgba(233,255,242,.92);
       user-select:none;
     }
     .dot{width:8px;height:8px;border-radius:50%}
-    .g{background:var(--g); box-shadow:0 0 14px rgba(92,255,122,.45)}
-    .c{background:var(--c); box-shadow:0 0 14px rgba(55,230,255,.35)}
-    .p{background:var(--p); box-shadow:0 0 14px rgba(179,107,255,.35)}
-    .y{background:var(--y); box-shadow:0 0 14px rgba(255,214,107,.25)}
+    .dg{background:var(--g); box-shadow:0 0 14px rgba(69,255,117,.45)}
+    .db{background:var(--b); box-shadow:0 0 14px rgba(47,169,255,.35)}
+    .dy{background:var(--y); box-shadow:0 0 14px rgba(255,185,74,.25)}
 
-    /* Main stage */
+    .bannerMain{
+      position:relative;
+      padding: 14px 14px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .logoRow{display:flex; align-items:center; gap:12px}
+    .bio{
+      width:44px;height:44px;border-radius:14px;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(255,185,74,.95), rgba(255,185,74,.10) 52%, transparent 62%),
+        radial-gradient(circle at 70% 65%, rgba(69,255,117,.30), transparent 60%),
+        linear-gradient(180deg, rgba(12,18,18,.95), rgba(6,10,12,.95));
+      border:1px solid rgba(255,185,74,.30);
+      box-shadow: 0 0 0 1px rgba(69,255,117,.10) inset;
+    }
+    .h1{
+      margin:0;
+      font-family:var(--mono);
+      font-weight:1000;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size: 44px;
+      line-height:1;
+      text-shadow: 0 10px 40px rgba(0,0,0,.60);
+    }
+    @media (max-width: 520px){
+      .h1{font-size: 34px}
+    }
+
+    /* ===== game body ===== */
     .stage{
-      flex:1;
+      margin-top: 14px;
       display:grid;
-      grid-template-columns: 1.1fr .9fr;
+      grid-template-columns: 360px 1fr 360px;
       gap:14px;
     }
-    @media (max-width: 980px){
-      .stage{grid-template-columns:1fr}
+    @media (max-width: 1050px){
+      .stage{grid-template-columns: 1fr}
     }
 
     .panel{
       border-radius: var(--r);
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(7,10,16,.62);
+      border:1px solid var(--stroke);
+      background: var(--panel);
       backdrop-filter: blur(10px);
       box-shadow: var(--shadow);
       overflow:hidden;
+      position:relative;
     }
-    .panelHead{
-      padding:12px 14px;
+    .panel::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(900px 360px at 20% -10%, rgba(69,255,117,.10), transparent 60%);
+      opacity:.8; pointer-events:none;
+    }
+    .ph{
+      position:relative;
+      padding: 12px 14px;
       border-bottom:1px solid rgba(255,255,255,.10);
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
     }
-    .panelHead b{
-      font-family:var(--mono); letter-spacing:.10em; text-transform:uppercase; font-size:12px;
-    }
-    .panelBody{padding:14px}
-
-    .big{
+    .ph b{
       font-family:var(--mono);
-      font-weight:900;
-      letter-spacing:.04em;
+      letter-spacing:.12em;
       text-transform:uppercase;
-      font-size:34px;
-      line-height:1.05;
-      margin:0;
+      font-weight:1000;
+      font-size:12px;
     }
-    .sub{
-      margin:10px 0 0;
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.55;
-      max-width:68ch;
-    }
+    .pb{position:relative; padding:14px}
 
-    /* GAME BUTTONS */
-    .btns{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+    /* ===== buttons (like screenshot) ===== */
     .btn{
-      border:0; cursor:pointer; user-select:none;
-      padding:12px 14px; border-radius:14px;
-      font-family:var(--mono); font-weight:900;
-      letter-spacing:.08em; text-transform:uppercase; font-size:12px;
-      color:rgba(233,255,242,.95);
-      background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.16);
+      width:100%;
+      border:0;
+      cursor:pointer;
+      user-select:none;
+      padding: 14px 14px;
+      border-radius: 14px;
+      font-family:var(--mono);
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-weight:1000;
+      font-size:12px;
+      color: rgba(233,255,242,.96);
+      border:1px solid rgba(255,255,255,.12);
       box-shadow: 0 14px 40px rgba(0,0,0,.35);
       transition: transform .08s ease, filter .15s ease;
+      position:relative;
+      overflow:hidden;
+      text-align:left;
     }
     .btn:hover{filter:brightness(1.08)}
     .btn:active{transform:translateY(1px)}
-    .btn.g{border-color:rgba(92,255,122,.35); background:linear-gradient(180deg, rgba(92,255,122,.26), rgba(92,255,122,.08))}
-    .btn.c{border-color:rgba(55,230,255,.32); background:linear-gradient(180deg, rgba(55,230,255,.22), rgba(55,230,255,.06))}
-    .btn.p{border-color:rgba(179,107,255,.30); background:linear-gradient(180deg, rgba(179,107,255,.22), rgba(179,107,255,.06))}
-    .btn.y{border-color:rgba(255,214,107,.30); background:linear-gradient(180deg, rgba(255,214,107,.20), rgba(255,214,107,.06))}
     .btn:disabled{opacity:.45; cursor:not-allowed; filter:saturate(.7)}
 
-    /* Profile cards */
-    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px}
-    @media (max-width: 560px){ .grid2{grid-template-columns:1fr} }
-    .card{
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(6,8,12,.55);
-      padding:12px;
+    .btn::after{
+      content:"";
+      position:absolute; inset:-40% -20%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      transform: rotate(12deg) translateX(-40%);
+      opacity:.55;
     }
-    .k{font-family:var(--mono); font-size:11px; letter-spacing:.10em; text-transform:uppercase; color:rgba(233,255,242,.65)}
-    .v{margin-top:6px; font-family:var(--mono); font-size:18px; font-weight:900}
-    .v.g{color:var(--g); text-shadow:0 0 18px rgba(92,255,122,.20)}
-    .v.c{color:var(--c); text-shadow:0 0 18px rgba(55,230,255,.16)}
+    .btn:hover::after{ transform: rotate(12deg) translateX(20%); transition: transform .5s ease; }
 
-    /* Simple “screens” */
-    .screen{display:none}
-    .screen.show{display:block}
+    .green{background: linear-gradient(180deg, rgba(69,255,117,.30), rgba(69,255,117,.10)); border-color: rgba(69,255,117,.34)}
+    .blue {background: linear-gradient(180deg, rgba(47,169,255,.26), rgba(47,169,255,.08)); border-color: rgba(47,169,255,.30)}
+    .purple{background: linear-gradient(180deg, rgba(177,107,255,.26), rgba(177,107,255,.08)); border-color: rgba(177,107,255,.30)}
+    .yellow{background: linear-gradient(180deg, rgba(255,185,74,.24), rgba(255,185,74,.08)); border-color: rgba(255,185,74,.30)}
 
-    table{width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px; overflow:hidden; border-radius:14px}
+    .btnRow{display:grid; gap:10px}
+
+    .smallRow{display:grid; gap:10px; margin-top:12px}
+    .smallGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 1050px){
+      .smallGrid{grid-template-columns:1fr}
+    }
+
+    /* ===== status list ===== */
+    .stat{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(8,12,14,.48);
+      font-family:var(--mono);
+      font-size:12px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+    .stat span{color:rgba(233,255,242,.82)}
+    .stat b{font-weight:1000}
+    .glowG{color:var(--g); text-shadow:0 0 18px rgba(69,255,117,.22)}
+    .glowB{color:var(--b); text-shadow:0 0 18px rgba(47,169,255,.18)}
+
+    .mission{
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(8,12,14,.48);
+      padding: 12px;
+      font-family:var(--mono);
+      font-size:12px;
+      letter-spacing:.04em;
+      color: rgba(233,255,242,.88);
+      line-height:1.6;
+    }
+
+    /* ===== center content ===== */
+    .centerTitle{
+      margin:0;
+      font-family:var(--mono);
+      font-weight:1000;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size: 22px;
+    }
+    .desc{
+      margin:10px 0 0;
+      color: var(--mut);
+      font-size: 14px;
+      line-height:1.6;
+      max-width: 70ch;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      font-family:var(--mono);
+      font-size:12px;
+      margin-top:12px;
+      border-radius:14px;
+      overflow:hidden;
+    }
     th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.10); text-align:left}
-    th{color:rgba(233,255,242,.75); letter-spacing:.10em; text-transform:uppercase; font-size:11px}
+    th{color:rgba(233,255,242,.70); letter-spacing:.12em; text-transform:uppercase; font-size:11px}
     tr:hover td{background:rgba(255,255,255,.05)}
-    .num{color:var(--g); font-weight:900}
+    .num{color:var(--g); font-weight:1000}
 
-    /* Toast */
+    /* ===== footer tags ===== */
+    .footer{
+      margin-top: 14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .tag{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(7,10,12,.55);
+      box-shadow: var(--shadow);
+      font-family:var(--mono);
+      font-size:12px;
+      letter-spacing:.06em;
+    }
+    .tag a{color:rgba(233,255,242,.92); text-decoration:none}
+    .tag a:hover{filter:brightness(1.08)}
     .toast{
       position:fixed; left:50%; bottom:14px; transform:translateX(-50%);
-      z-index:20;
-      background: rgba(7,10,16,.78);
+      z-index:10;
+      background: rgba(7,10,12,.82);
       border:1px solid rgba(255,255,255,.14);
       border-radius:14px;
       padding:12px 14px;
-      font-family:var(--mono); font-size:12px; color:rgba(233,255,242,.92);
-      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      box-shadow: var(--shadow);
+      font-family:var(--mono);
+      font-size:12px;
       display:none;
-      max-width:min(720px, calc(100vw - 24px));
+      max-width:min(760px, calc(100vw - 24px));
     }
     .toast.show{display:block}
   </style>
 </head>
-
 <body>
-  <div class="bg" id="bg">
-    <!-- VIDEO BACKGROUND: будет работать, если задашь BG_VIDEO_URL в JS -->
-    <video id="bgVid" autoplay muted loop playsinline></video>
-    <!-- если хочешь вместо видео картинку/гиф: BG_IMAGE_URL -->
-    <img id="bgImg" alt="" style="display:none" />
-  </div>
-  <div class="noise"></div>
+  <div class="bg"></div>
+  <div class="vignette"></div>
+  <div class="scan"></div>
   <div class="sparks"></div>
 
   <div class="wrap">
-    <!-- HUD -->
-    <div class="hud">
-      <div class="brand">
-        <div class="logo"></div>
-        <div class="title">
-          <div class="t">ЗомбиГлобал</div>
-          <div class="s">ARCADE OUTBREAK • MEME GAME</div>
+    <!-- TOP BANNER -->
+    <section class="banner">
+      <div class="bannerTop">
+        <div class="mini">ARCADE OUTBREAK • MEME GAME</div>
+        <div class="hudMini">
+          <div class="pill"><span class="dot dg"></span>ID: <b id="hudId">—</b></div>
+          <div class="pill"><span class="dot db"></span>BY: <b id="hudBy">—</b></div>
+          <div class="pill"><span class="dot dy"></span>INF: <b id="hudInf">—</b></div>
         </div>
       </div>
-      <div class="hudRight">
-        <div class="pill"><span class="dot g"></span>ID <span id="hudId">—</span></div>
-        <div class="pill"><span class="dot c"></span>BY <span id="hudBy">—</span></div>
-        <div class="pill"><span class="dot y"></span>INF <span id="hudInf">—</span></div>
-        <button class="btn c" id="btnCopyHud" disabled>COPY LINK</button>
-      </div>
-    </div>
-
-    <div class="stage">
-      <!-- LEFT: MAIN GAME -->
-      <div class="panel">
-        <div class="panelHead">
-          <b id="screenTitle">MAIN MENU</b>
-          <div class="pill"><span class="dot p"></span><span id="refHint">ref: —</span></div>
+      <div class="bannerMain">
+        <div class="logoRow">
+          <div class="bio"></div>
+          <h1 class="h1">ЗОМБИГЛОБАЛ</h1>
         </div>
-
-        <div class="panelBody">
-          <!-- MENU -->
-          <div class="screen show" id="menu">
-            <h1 class="big">Outbreak Arena</h1>
-            <p class="sub">
-              Это <b>игровой реестр заражения</b>. Получи номер → заражай друзей → поднимайся в топ → оставь цепочку.
-            </p>
-            <div class="btns">
-              <button class="btn g" id="btnClaim">GET INFECTION ID</button>
-              <button class="btn c" id="btnInfect" disabled>INFECT FRIEND</button>
-              <button class="btn p" id="goTop">LEADERBOARD</button>
-              <button class="btn y" id="goChain">LINEAGE</button>
-            </div>
-
-            <div class="grid2">
-              <div class="card">
-                <div class="k">Your Infection</div>
-                <div class="v g" id="meNum">—</div>
-              </div>
-              <div class="card">
-                <div class="k">Share Link</div>
-                <div class="v" id="meLink" style="font-size:12px;color:rgba(233,255,242,.85);word-break:break-all">—</div>
-              </div>
-            </div>
-
-            <div class="btns" style="margin-top:12px">
-              <a class="btn c" href="https://t.me/zombievirus_server" target="_blank" rel="noreferrer">OPEN SERVER</a>
-              <a class="btn c" href="https://t.me/ZombieVirusLabBot" target="_blank" rel="noreferrer">OPEN BOT</a>
-              <button class="btn" id="btnReset">RESET DEMO</button>
-            </div>
-          </div>
-
-          <!-- TOP -->
-          <div class="screen" id="top">
-            <p class="sub" style="margin:0 0 10px">Локальный топ (демо). Глобальный подключим после того, как визуал станет идеальный.</p>
-            <table>
-              <thead><tr><th>#</th><th>Infection</th><th>Infections</th><th>By</th></tr></thead>
-              <tbody id="lb">
-                <tr><td style="color:rgba(233,255,242,.6)">—</td><td class="num">—</td><td style="color:rgba(233,255,242,.6)">—</td><td style="color:rgba(233,255,242,.6)">—</td></tr>
-              </tbody>
-            </table>
-            <div class="btns" style="margin-top:12px">
-              <button class="btn p" id="back1">BACK</button>
-            </div>
-          </div>
-
-          <!-- CHAIN -->
-          <div class="screen" id="chain">
-            <p class="sub" style="margin:0 0 10px">Цепочка “кто кого” (демо). Это будет самое мемное.</p>
-            <div class="card">
-              <div class="k">Lineage</div>
-              <div class="v" id="chainTxt" style="font-size:14px;color:rgba(233,255,242,.9)">—</div>
-            </div>
-            <div class="btns" style="margin-top:12px">
-              <button class="btn y" id="btnBuild">BUILD CHAIN</button>
-              <button class="btn p" id="back2">BACK</button>
-            </div>
-          </div>
-
+        <div class="pill" style="border-color:rgba(177,107,255,.25)">
+          <span class="dot" style="background:var(--p);box-shadow:0 0 14px rgba(177,107,255,.35)"></span>
+          <span id="refHint">ref: —</span>
         </div>
       </div>
+    </section>
 
-      <!-- RIGHT: PLAYER HUD / MISSION -->
-      <div class="panel">
-        <div class="panelHead">
-          <b>PLAYER</b>
-          <div class="pill"><span class="dot g"></span>DEMO</div>
+    <!-- GAME STAGE -->
+    <section class="stage">
+      <!-- LEFT MENU -->
+      <aside class="panel">
+        <div class="ph">
+          <b>OUTBREAK ARENA</b>
+          <span class="pill"><span class="dot dg"></span>MENU</span>
         </div>
-        <div class="panelBody">
-          <div class="grid2" style="margin-top:0">
-            <div class="card">
-              <div class="k">ID</div>
-              <div class="v g" id="pId">—</div>
-            </div>
-            <div class="card">
-              <div class="k">INFECTED BY</div>
-              <div class="v c" id="pBy">—</div>
-            </div>
-            <div class="card">
-              <div class="k">INFECTIONS</div>
-              <div class="v g" id="pInf">—</div>
-            </div>
-            <div class="card">
-              <div class="k">MISSION</div>
-              <div class="v" style="font-size:12px;color:rgba(233,255,242,.86);line-height:1.5">
-                1) Get ID<br/>
-                2) Copy link<br/>
-                3) Infect friends<br/>
-                4) Climb Top
-              </div>
-            </div>
+        <div class="pb">
+          <div class="btnRow">
+            <button class="btn green" id="btnClaim">GET INFECTION ID</button>
+            <button class="btn blue" id="btnInfect" disabled>INFECT FRIEND</button>
+            <button class="btn purple" id="btnTop">LEADERBOARD</button>
+            <button class="btn yellow" id="btnLineage">VIEW LINEAGE</button>
           </div>
 
-          <div class="btns" style="margin-top:12px">
-            <button class="btn c" id="btnCopy" disabled>COPY LINK</button>
-            <button class="btn g" id="btnFull">FULLSCREEN</button>
+          <div class="smallRow">
+            <div class="smallGrid">
+              <a class="btn blue" id="btnBot" href="https://t.me/ZombieVirusLabBot" target="_blank" rel="noreferrer">OPEN BOT</a>
+              <a class="btn blue" id="btnServer" href="https://t.me/zombievirus_server" target="_blank" rel="noreferrer">OPEN SERVER</a>
+            </div>
+            <button class="btn" id="btnReset" style="opacity:.85">RESET DEMO</button>
           </div>
+        </div>
+      </aside>
 
-          <p class="sub" style="margin-top:12px">
-            ⚠️ Это игра-мем. Не реальный вирус.<br/>
-            Фон будет выглядеть как “жёсткая игра”, когда ты поставишь свой <b>zombie crowd</b> фон (видео/гиф).
+      <!-- CENTER (content) -->
+      <main class="panel">
+        <div class="ph">
+          <b id="centerTitle">MAIN</b>
+          <span class="pill"><span class="dot dy"></span>DEMO</span>
+        </div>
+        <div class="pb">
+          <h2 class="centerTitle">Статус + Рейтинг = мем, который люди сами разнесут</h2>
+          <p class="desc">
+            Получаешь номер → делишься ссылкой → друзья заходят по <b>?ref=</b> → ты растёшь по заражениям.
+            Следующий шаг: <b>share-card</b> (картинка “I’m #000123”), сезонные таблицы и “First 100”.
           </p>
+
+          <table>
+            <thead><tr><th>#</th><th>Infection</th><th>Infections</th><th>By</th></tr></thead>
+            <tbody id="lb">
+              <tr><td style="color:rgba(233,255,242,.55)">—</td><td class="num">—</td><td style="color:rgba(233,255,242,.55)">—</td><td style="color:rgba(233,255,242,.55)">—</td></tr>
+            </tbody>
+          </table>
+
+          <div class="smallRow">
+            <div class="smallGrid">
+              <button class="btn blue" id="btnCopy" disabled>COPY LINK</button>
+              <button class="btn green" id="btnFull">FULLSCREEN</button>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
+
+      <!-- RIGHT STATUS -->
+      <aside class="panel">
+        <div class="ph">
+          <b>PLAYER STATUS</b>
+          <span class="pill"><span class="dot dg"></span>ONLINE</span>
+        </div>
+        <div class="pb">
+          <div class="stat"><span>INFECTION ID</span><b class="glowG" id="pId">—</b></div>
+          <div class="stat"><span>INFECTED BY</span><b class="glowB" id="pBy">—</b></div>
+          <div class="stat"><span>INFECTIONS</span><b class="glowG" id="pInf">—</b></div>
+
+          <div class="mission">
+            <b style="letter-spacing:.12em">MISSION:</b><br>
+            1. GET ID<br>
+            2. COPY LINK<br>
+            3. INFECT FRIENDS<br>
+            4. CLIMB TOP
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- FOOTER TAGS -->
+    <div class="footer">
+      <div class="tag">TG BOT: <a href="https://t.me/ZombieVirusLabBot" target="_blank" rel="noreferrer">@ZombieVirusLabBot</a></div>
+      <div class="tag">TG SERVER: <a href="https://t.me/zombievirus_server" target="_blank" rel="noreferrer">@zombievirus_server</a></div>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    // ====== ВСТАВЬ СЮДА СВОЙ ФОН (видео/гиф) ======
-    // Можно дать прямую ссылку на mp4/webm (GitHub raw / CDN).
-    const BG_VIDEO_URL = ""; // например: "https://.../zombie-crowd.mp4"
-    const BG_IMAGE_URL = ""; // если хочешь картинку/гиф вместо видео
-
-    // ====== DEMO STATE (локально) ======
-    const LS = "zg_game_v1";
+    // ===== demo state (local) =====
+    const LS = "zg_arcade_v1";
     const $ = (id)=>document.getElementById(id);
     const toastEl = $("toast");
 
@@ -387,7 +484,8 @@
     function toast(t){
       toastEl.textContent = t;
       toastEl.classList.add("show");
-      setTimeout(()=>toastEl.classList.remove("show"), 2200);
+      clearTimeout(toastEl._t);
+      toastEl._t = setTimeout(()=>toastEl.classList.remove("show"), 2100);
     }
 
     function getRef(){
@@ -403,19 +501,11 @@
       return u.toString();
     }
 
-    function load(){
-      try{ return JSON.parse(localStorage.getItem(LS) || "null"); }catch{ return null; }
-    }
+    function load(){ try{ return JSON.parse(localStorage.getItem(LS) || "null"); }catch{ return null; } }
     function save(s){ localStorage.setItem(LS, JSON.stringify(s)); }
     function init(){
       const s = load() || { next:1, me:null, users:{} };
-      save(s);
-      return s;
-    }
-
-    function show(screen){
-      ["menu","top","chain"].forEach(x=>$(x).classList.toggle("show", x===screen));
-      $("screenTitle").textContent = screen==="menu" ? "MAIN MENU" : screen==="top" ? "LEADERBOARD" : "LINEAGE";
+      save(s); return s;
     }
 
     async function copyLink(){
@@ -440,48 +530,46 @@
       $("hudBy").textContent = me ? (me.by ? fmt(me.by) : "—") : "—";
       $("hudInf").textContent = me ? String(me.inf||0) : "—";
 
-      $("meNum").textContent = me ? fmt(me.id) : "—";
-      $("meLink").textContent = me ? buildLink(me.id) : "—";
-
       $("pId").textContent = me ? fmt(me.id) : "—";
       $("pBy").textContent = me ? (me.by ? fmt(me.by) : "—") : "—";
       $("pInf").textContent = me ? String(me.inf||0) : "—";
 
-      const has = !!me;
-      $("btnInfect").disabled = !has;
-      $("btnCopy").disabled = !has;
-      $("btnCopyHud").disabled = !has;
+      $("btnInfect").disabled = !me;
+      $("btnCopy").disabled = !me;
 
       // local leaderboard
       const rows = Object.values(s.users).sort((a,b)=>(b.inf||0)-(a.inf||0) || a.id-b.id);
       const tb = $("lb");
-      tb.innerHTML = rows.length ? "" : `<tr><td style="color:rgba(233,255,242,.6)">—</td><td class="num">—</td><td style="color:rgba(233,255,242,.6)">—</td><td style="color:rgba(233,255,242,.6)">—</td></tr>`;
-      rows.slice(0,25).forEach((u,i)=>{
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td style="color:rgba(233,255,242,.65)">#${i+1}</td>
-                        <td class="num">${fmt(u.id)}</td>
-                        <td style="color:rgba(233,255,242,.75)">${u.inf||0}</td>
-                        <td style="color:rgba(233,255,242,.65)">${u.by?fmt(u.by):"—"}</td>`;
-        tb.appendChild(tr);
-      });
+      tb.innerHTML = "";
+      if(!rows.length){
+        tb.innerHTML = `<tr><td style="color:rgba(233,255,242,.55)">—</td><td class="num">—</td><td style="color:rgba(233,255,242,.55)">—</td><td style="color:rgba(233,255,242,.55)">—</td></tr>`;
+      }else{
+        rows.slice(0,25).forEach((u,i)=>{
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td style="color:rgba(233,255,242,.65)">#${i+1}</td>
+                          <td class="num">${fmt(u.id)}</td>
+                          <td style="color:rgba(233,255,242,.75)">${u.inf||0}</td>
+                          <td style="color:rgba(233,255,242,.65)">${u.by?fmt(u.by):"—"}</td>`;
+          tb.appendChild(tr);
+        });
+      }
     }
 
     function claim(){
       const s = init();
       if(s.me){ toast("ALREADY HAS ID"); return; }
-
       const ref = getRef();
       const id = s.next++;
       const me = { id, by: ref || null, inf: 0 };
       s.me = me;
       s.users[String(id)] = me;
 
-      // demo: если origin есть локально — накинем ему +1
-      if(ref && s.users[String(ref)]) s.users[String(ref)].inf = (s.users[String(ref)].inf||0) + 1;
+      // demo: if ref exists locally -> +1 infection
+      if(ref && s.users[String(ref)]) s.users[String(ref)].inf = (s.users[String(ref)].inf || 0) + 1;
 
       save(s);
 
-      // сразу обновим URL (чтобы ощущалось как игра)
+      // update URL instantly
       history.replaceState(null, "", buildLink(id));
 
       toast("ID ISSUED: " + fmt(id));
@@ -493,25 +581,10 @@
       toast("SEND LINK TO A FRIEND");
     }
 
-    function buildChain(){
-      const s = init();
-      if(!s.me){ toast("GET ID FIRST"); return; }
-      let cur = s.me, chain = [], guard = 0;
-      while(cur && guard++ < 30){
-        chain.push(fmt(cur.id));
-        if(!cur.by) break;
-        cur = s.users[String(cur.by)] || { id: cur.by, by:null, inf:0 };
-      }
-      $("chainTxt").textContent = chain.join("  →  ");
-      toast("CHAIN READY");
-    }
-
     function reset(){
       localStorage.removeItem(LS);
       toast("RESET");
       render();
-      show("menu");
-      $("chainTxt").textContent = "—";
     }
 
     function fullscreen(){
@@ -520,42 +593,17 @@
       else document.exitFullscreen?.();
     }
 
-    // background setup
-    (function setupBg(){
-      const vid = $("bgVid");
-      const img = $("bgImg");
-
-      if(BG_VIDEO_URL){
-        vid.src = BG_VIDEO_URL;
-        vid.style.display = "block";
-        img.style.display = "none";
-      }else if(BG_IMAGE_URL){
-        img.src = BG_IMAGE_URL;
-        img.style.display = "block";
-        vid.style.display = "none";
-      }else{
-        // если пусто — просто оставим “энерго-фон” без файла
-        vid.style.display = "none";
-        img.style.display = "none";
-      }
-    })();
-
     // wire
     $("btnClaim").onclick = claim;
     $("btnInfect").onclick = infect;
     $("btnCopy").onclick = copyLink;
-    $("btnCopyHud").onclick = copyLink;
     $("btnReset").onclick = reset;
-
-    $("goTop").onclick = ()=>show("top");
-    $("goChain").onclick = ()=>show("chain");
-    $("back1").onclick = ()=>show("menu");
-    $("back2").onclick = ()=>show("menu");
-    $("btnBuild").onclick = buildChain;
-
     $("btnFull").onclick = fullscreen;
 
-    show("menu");
+    // screens (пока один экран, просто подсветка заголовка)
+    $("btnTop").onclick = ()=>{ $("centerTitle").textContent="LEADERBOARD"; toast("LEADERBOARD"); };
+    $("btnLineage").onclick = ()=>{ $("centerTitle").textContent="LINEAGE"; toast("LINEAGE (next)"); };
+
     render();
   </script>
 </body>
