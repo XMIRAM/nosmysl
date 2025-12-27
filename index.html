@@ -1,0 +1,1443 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b0f14" />
+  <meta property="og:title" content="BROKE → BOSS Button" />
+  <meta property="og:description" content="Жми кнопку. Получай миссию на 24 часа. Отчёт — в 1 клик." />
+  <title>BROKE → BOSS Button</title>
+
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.04);
+      --stroke: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --muted2: rgba(255,255,255,.45);
+      --good: #48ffb8;
+      --bad:  #ff4d6d;
+      --hot:  #ffb86b;
+      --cold: #7aa8ff;
+      --glow: 0 0 40px rgba(122,168,255,.22), 0 0 70px rgba(72,255,184,.12);
+      --radius: 26px;
+      --shadow: 0 18px 70px rgba(0,0,0,.55);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background:
+        radial-gradient(900px 600px at 15% 10%, rgba(122,168,255,.14), transparent 55%),
+        radial-gradient(900px 600px at 85% 20%, rgba(72,255,184,.10), transparent 55%),
+        radial-gradient(900px 700px at 50% 95%, rgba(255,184,107,.10), transparent 60%),
+        linear-gradient(180deg, #070a0f 0%, #0b0f14 40%, #070a0f 100%);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+    }
+
+    .noise::before{
+      content:"";
+      position: fixed; inset:0;
+      pointer-events:none;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+      opacity:.35;
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 18px 90px;
+      position: relative;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 8px;
+      margin-bottom: 18px;
+    }
+
+    .brand{
+      display:flex; gap:14px; align-items:flex-start;
+    }
+
+    .logo{
+      width: 46px; height: 46px;
+      border-radius: 16px;
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.32), transparent 60%),
+        linear-gradient(135deg, rgba(72,255,184,.90), rgba(122,168,255,.88), rgba(255,184,107,.90));
+      box-shadow: var(--glow);
+      position: relative;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    .logo::after{
+      content:"";
+      position:absolute; inset:-40%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      transform: rotate(25deg);
+      animation: sweep 3.2s linear infinite;
+    }
+    @keyframes sweep{
+      0%{ transform: translateX(-40%) rotate(25deg); opacity: .0;}
+      15%{ opacity:.9;}
+      50%{ opacity:.0;}
+      100%{ transform: translateX(60%) rotate(25deg); opacity:0;}
+    }
+
+    .title{
+      line-height:1.05;
+    }
+    .title h1{
+      margin:0;
+      font-size: clamp(28px, 4.6vw, 44px);
+      letter-spacing: -0.03em;
+    }
+    .title p{
+      margin:10px 0 0;
+      color: var(--muted);
+      max-width: 640px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill{
+      display:flex; gap:10px; align-items:center;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 30px rgba(0,0,0,.28);
+      color: var(--muted);
+      font-size: 13px;
+      user-select:none;
+    }
+
+    .pill b{ color: var(--text); font-weight: 600; }
+    .dot{
+      width:8px; height:8px; border-radius:99px;
+      background: var(--good);
+      box-shadow: 0 0 18px rgba(72,255,184,.45);
+    }
+
+    main{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      align-items:start;
+    }
+
+    @media (max-width: 920px){
+      main{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position: relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(400px 220px at 20% 10%, rgba(72,255,184,.10), transparent 60%),
+        radial-gradient(360px 220px at 80% 0%, rgba(122,168,255,.12), transparent 60%),
+        radial-gradient(500px 260px at 50% 110%, rgba(255,184,107,.09), transparent 60%);
+      opacity:.9;
+    }
+
+    .card .inner{
+      position: relative;
+      padding: 18px;
+    }
+
+    .subhead{
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .subhead h2{
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: .02em;
+      color: rgba(255,255,255,.86);
+      font-weight: 650;
+    }
+
+    .badge{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.78);
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .btn-row{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      color: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+    button:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.16);}
+    button:active{ transform: translateY(1px) scale(.99);}
+
+    .primary{
+      background: linear-gradient(135deg, rgba(72,255,184,.88), rgba(122,168,255,.82), rgba(255,184,107,.85));
+      border-color: rgba(255,255,255,.18);
+      box-shadow: var(--glow), 0 18px 60px rgba(0,0,0,.45);
+      color: rgba(0,0,0,.82);
+    }
+
+    .danger{
+      background: rgba(255,77,109,.14);
+      border-color: rgba(255,77,109,.28);
+      color: rgba(255,255,255,.92);
+    }
+
+    .ghost{
+      background: transparent;
+      border: 1px dashed rgba(255,255,255,.22);
+      color: rgba(255,255,255,.85);
+      box-shadow: none;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 520px){
+      .grid2{ grid-template-columns: 1fr; }
+    }
+
+    .control{
+      display:flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    label{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    select,input[type="range"],input[type="text"],textarea{
+      width: 100%;
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.92);
+      outline: none;
+      font-family: var(--sans);
+    }
+    textarea{ min-height: 92px; resize: vertical; }
+
+    .big{
+      font-size: clamp(18px, 2.2vw, 22px);
+      letter-spacing: -.02em;
+      line-height: 1.25;
+      margin: 0 0 10px;
+    }
+
+    .muted{ color: var(--muted); }
+    .muted2{ color: var(--muted2); }
+
+    .missionTitle{
+      margin: 0;
+      font-size: clamp(18px, 2.1vw, 24px);
+      letter-spacing: -.02em;
+      line-height: 1.2;
+    }
+
+    .meta{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      margin-bottom: 12px;
+    }
+
+    .chip{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.80);
+      display:flex;
+      gap:8px; align-items:center;
+    }
+
+    .progress{
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .bar{
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+      margin-top: 8px;
+    }
+    .fill{
+      height:100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(72,255,184,.92), rgba(122,168,255,.86), rgba(255,184,107,.92));
+      box-shadow: var(--glow);
+      transition: width .25s ease;
+    }
+
+    .checklist{
+      display:flex; flex-direction:column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .item{
+      display:flex; gap:10px; align-items:flex-start;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .item input{ margin-top: 3px; transform: scale(1.2); }
+    .item b{ display:block; margin-bottom: 4px; }
+    .item small{ color: var(--muted); display:block; line-height:1.35; }
+
+    .timer{
+      display:flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.10);
+      margin-top: 14px;
+    }
+    .timer .t{
+      font-family: var(--mono);
+      font-size: 16px;
+      letter-spacing: .02em;
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      padding: 12px 14px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.60);
+      border: 1px solid rgba(255,255,255,.16);
+      color: rgba(255,255,255,.88);
+      font-size: 13px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.45);
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 50;
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-6px);
+    }
+
+    .kicker{
+      font-family: var(--mono);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: rgba(255,255,255,.62);
+      margin: 0 0 6px;
+    }
+
+    .divider{
+      height:1px;
+      background: rgba(255,255,255,.10);
+      margin: 14px 0;
+    }
+
+    .small-actions{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .canvasWrap{
+      margin-top: 12px;
+      border-radius: 18px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    canvas{
+      width: 100%;
+      height: auto;
+      display:block;
+    }
+
+    .footer{
+      margin-top: 18px;
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+      text-align:center;
+    }
+
+    .spark{
+      display:inline-block;
+      width:10px; height:10px;
+      border-radius: 99px;
+      background: rgba(72,255,184,.92);
+      box-shadow: 0 0 22px rgba(72,255,184,.50);
+      margin-right: 8px;
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+
+<body class="noise">
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">
+          <h1>BROKE → BOSS Button</h1>
+          <p>
+            Жми кнопку — получай <b>миссию на 24 часа</b>. Сделай хоть что-то реальное.
+            В конце — <b>отчёт + пост для соцсетей</b> в 1 клик. Красиво. Смешно. Больно правдиво.
+          </p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="pill"><span class="dot"></span><span>режим: <b id="modeLabel">SAFE CHAOS</b></span></div>
+        <div class="pill"><span>статус: <b id="statusLabel">готов к нажатию</b></span></div>
+      </div>
+    </header>
+
+    <main>
+      <!-- LEFT: Mission -->
+      <section class="card">
+        <div class="inner">
+          <div class="subhead">
+            <h2>🎛️ Пульт реальности</h2>
+            <div class="badge"><span class="spark"></span><span id="bossName">BOSS: ???</span></div>
+          </div>
+
+          <div class="grid2">
+            <div class="control">
+              <label>Режим</label>
+              <select id="mode">
+                <option value="safe">SAFE CHAOS (безопасно, но дерзко)</option>
+                <option value="hard">HARD MODE (жёстко, но легально)</option>
+                <option value="meme">MEME LORD (максимально смешно)</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label>Тема миссий</label>
+              <select id="theme">
+                <option value="mixed">Смешанный хаос</option>
+                <option value="money">Деньги</option>
+                <option value="skills">Навык</option>
+                <option value="health">Тело</option>
+                <option value="social">Социалка</option>
+                <option value="clean">Порядок</option>
+                <option value="creator">Контент</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label>Длительность</label>
+              <select id="duration">
+                <option value="24">24 часа (канон)</option>
+                <option value="6">6 часов (ускоритель)</option>
+                <option value="1">1 час (допамин-тест)</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label>Саботаж-фильтр (меньше кринжа) — <span id="cringeLabel">35%</span></label>
+              <input id="cringe" type="range" min="0" max="100" value="35" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="primary" id="btnGenerate">ЖМИ. ДАЙ МНЕ МИССИЮ</button>
+            <button id="btnStart">Запустить таймер</button>
+            <button class="ghost" id="btnReroll">Реролл (если выпал кринж)</button>
+            <button class="danger" id="btnReset">Сбросить всё</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <p class="kicker">Твоя миссия</p>
+          <h3 class="missionTitle" id="mTitle">Пока пусто. Нажми кнопку.</h3>
+          <p class="muted" id="mHook">Сайт не будет тебя вдохновлять. Он будет тебя толкать.</p>
+
+          <div class="meta" id="metaRow" style="display:none;">
+            <div class="chip">⏱️ <span id="mEta">—</span></div>
+            <div class="chip">🎯 <span id="mDifficulty">—</span></div>
+            <div class="chip">📌 Доказательство: <span id="mProof">—</span></div>
+            <div class="chip">🧪 “Реальность”: <span id="mReality">—</span></div>
+          </div>
+
+          <div class="timer" id="timerBox" style="display:none;">
+            <div>
+              <div class="muted2" style="font-size:12px;">до конца осталось</div>
+              <div class="t" id="timeLeft">—:—:—</div>
+            </div>
+            <div class="chip">⚡ Boss Points: <span id="points">0</span></div>
+          </div>
+
+          <div class="progress" id="progressBox" style="display:none;">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+              <div class="muted2" id="progressText">0/0 выполнено</div>
+              <div class="muted2" id="roastLine">—</div>
+            </div>
+            <div class="bar"><div class="fill" id="fill"></div></div>
+
+            <div class="checklist" id="checklist"></div>
+
+            <div class="small-actions">
+              <button id="btnReport">Сгенерить отчёт/пост</button>
+              <button id="btnShare">Шэр-карточка</button>
+              <button class="ghost" id="btnCopyLink">Скопировать ссылку</button>
+            </div>
+
+            <div class="canvasWrap" id="canvasWrap" style="display:none;">
+              <canvas id="shareCanvas" width="1200" height="630"></canvas>
+            </div>
+
+            <div class="footer">
+              <span class="spark"></span> Важно: тут нет сервера. Всё хранится у тебя в браузере.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Report / Post -->
+      <aside class="card">
+        <div class="inner">
+          <div class="subhead">
+            <h2>🧾 Отчёт и вирус-пост</h2>
+            <div class="badge"><span>OG-карточка готовится локально</span></div>
+          </div>
+
+          <p class="big">
+            Сделал миссию? Не молчи. <b>Сделай из этого пост</b>.
+            Интернет любит не “мотивацию”, а <b>доказательство</b>.
+          </p>
+
+          <div class="control">
+            <label>Что ты реально сделал? (коротко и без героизма)</label>
+            <textarea id="doneText" placeholder="Например: сделал 30 минут, потом хотел сдаться, но добил."></textarea>
+          </div>
+
+          <div class="grid2" style="margin-top:10px;">
+            <div class="control">
+              <label>Результат (цифра/факт)</label>
+              <input id="resultText" type="text" placeholder="Например: +1 видео / 12 заявок / 45 минут" />
+            </div>
+            <div class="control">
+              <label>Уровень боли (честно)</label>
+              <select id="pain">
+                <option>🙂 легкотня</option>
+                <option>😐 неприятно, но норм</option>
+                <option>😤 тяжело</option>
+                <option>🥵 почти сдох</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="control">
+            <label>Готовый пост (Twitter/Threads/Telegram)</label>
+            <textarea id="postOut" readonly></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button class="primary" id="btnMakePost">Собрать пост</button>
+            <button id="btnCopyPost">Копировать</button>
+            <button class="ghost" id="btnMakeInsult">Сделай пост смешнее</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <p class="muted" style="margin:0;">
+            💡 Подсказка: в конце миссии выкладывай шэр-карточку (кнопка слева).
+            Это и есть вирусный “пруф”.
+          </p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">ok</div>
+
+  <script>
+    // =========================
+    // BROKE → BOSS (Single-file)
+    // =========================
+
+    const $ = (id) => document.getElementById(id);
+
+    const STORAGE_KEY = "b2b_state_v1";
+    const now = () => Date.now();
+
+    const bossNames = [
+      "Анти-Прокрастинатор",
+      "Командир Пруфов",
+      "Генерал Дисциплины",
+      "Капитан 1%",
+      "Господин 'Щас-сделаю'",
+      "Лорд Стабильности",
+      "Режиссёр Реальности",
+      "Шеф Без Отмазок",
+      "Мастер Малых Побед",
+      "Император Мини-Действий"
+    ];
+
+    // Mission bank: для обычных людей, но с мемным вайбом.
+    // Каждая миссия = короткий квест + доказательство.
+    const MISSIONS = [
+      // MONEY
+      {
+        id:"money-1", theme:"money", difficulty: "Средне-нагло",
+        title:"Сделай 1€ из воздуха (легально) — сегодня.",
+        hook:"Да, это смешно. Но ты либо умеешь добывать деньги, либо умеешь мечтать. Выбирай.",
+        reality:"Деньги любят действие, не идеи.",
+        eta:"45–120 мин",
+        proof:"скрин/фото результата (чек/объявление/перевод)",
+        steps:[
+          {t:"Открой local marketplace (willhaben / facebook / kleinanzeigen).", d:"Найди вещь, которую можно отдать/продать быстро (даже за 1–5€)."},
+          {t:"Сделай 2 фото и короткое объявление.", d:"Без романов. Цена маленькая. Цель — скорость."},
+          {t:"Отправь 10 сообщений/ответь 10 людям.", d:"Скорость важнее гордости."},
+          {t:"Закрой сделку или поставь встречу на завтра.", d:"Если не продал — считаем как победу: назначенная встреча = успех."}
+        ],
+        roast:[
+          "Если ты сейчас не сделаешь — завтра опять будешь ‘готовиться’.",
+          "Идея без публикации — это сон в обед.",
+          "Смелость = 10 сообщений незнакомым людям."
+        ]
+      },
+      {
+        id:"money-2", theme:"money", difficulty:"Жёстко-практично",
+        title:"Собери 'мини-продукт' за 60 минут и выставь цену.",
+        hook:"Не бизнес. Мини-продукт. Один. Чёткий. Без стыда.",
+        reality:"Делают не лучшие — делают быстрые.",
+        eta:"60–90 мин",
+        proof:"ссылка на страницу/пост с ценой",
+        steps:[
+          {t:"Выбери 1 услугу, которую реально можешь сделать.", d:"Пример: монтаж 15 сек, озвучка, баннер, перевод, мини-сайт."},
+          {t:"Сделай 1 образец (демо).", d:"Даже кривой. Главное — показать."},
+          {t:"Напиши оффер в 2 строки + цену.", d:"Напр: “I’ll edit your Short in 1 hour — €5.”"},
+          {t:"Опубликуй (X/Reddit/Discord/Telegram/FB group).", d:"Пруф — ссылка. Точка."}
+        ],
+        roast:[
+          "Ты не бедный. Ты не опубликовал.",
+          "Если нет цены — это не продукт, а фантазия.",
+          "Демо решает 100%."
+        ]
+      },
+
+      // SKILLS
+      {
+        id:"skills-1", theme:"skills", difficulty:"Умно-противно",
+        title:"Выучи 20 слов/терминов — но так, чтобы они прилипли.",
+        hook:"Не ‘прочитал’. А чтобы завтра мог использовать. Иначе это мусор в голове.",
+        reality:"Мозг уважает повторение и боль.",
+        eta:"30–45 мин",
+        proof:"скрин списка + 5 предложений с ними",
+        steps:[
+          {t:"Выбери тему (англ/код/работа).", d:"Одну. Не 7."},
+          {t:"Выпиши 20 слов + перевод.", d:"Сделай это быстро."},
+          {t:"Составь 5 предложений, используя слова.", d:"Чтобы мозг понял: это не просто звуки."},
+          {t:"Произнеси вслух 2 минуты.", d:"Да, вслух. Да, странно. Да, работает."}
+        ],
+        roast:[
+          "Читать = приятно. Учить = неприятно. Поэтому выигрывают неприятные.",
+          "Слова без предложений — это коллекционирование хлама.",
+          "2 минуты вслух решают."
+        ]
+      },
+      {
+        id:"skills-2", theme:"skills", difficulty:"Хакерски-реально",
+        title:"Сделай микро-проект за 1 час и выложи.",
+        hook:"Тебе нужен не талант. Тебе нужен GitHub с жизнью.",
+        reality:"Публикация = взрослая игра.",
+        eta:"60–90 мин",
+        proof:"ссылка на репо/Pages",
+        steps:[
+          {t:"Выбери микро-идею.", d:"Пример: таймер, трекер, генератор, калькулятор."},
+          {t:"Сделай рабочий MVP в одном файле.", d:"HTML/CSS/JS. Главное — чтобы работало."},
+          {t:"Залей на GitHub и включи Pages.", d:"Пруф — ссылка."},
+          {t:"Напиши 1 абзац README.", d:"Что это и зачем. Всё."}
+        ],
+        roast:[
+          "Код без публикации — это дневник в стол.",
+          "Сначала MVP. Потом шедевр.",
+          "Выложил? Значит существуешь."
+        ]
+      },
+
+      // HEALTH
+      {
+        id:"health-1", theme:"health", difficulty:"Терпимо-жёстко",
+        title:"Сделай тело менее жалким за 12 минут.",
+        hook:"Никаких марафонов. 12 минут. Сейчас. И точка.",
+        reality:"Тело — это кнопка энергии. Не философия.",
+        eta:"12–15 мин",
+        proof:"таймер/селфи после (по желанию)",
+        steps:[
+          {t:"2 минуты разминки.", d:"Шея, плечи, колени, дыхание."},
+          {t:"6 минут круг: присед/отжим/планка.", d:"По 30–45 сек каждый, 2 круга."},
+          {t:"2 минуты растяжка.", d:"Чтобы не развалиться."},
+          {t:"2 минуты вода + запись в отчёт.", d:"‘Сделал’. Всё."}
+        ],
+        roast:[
+          "Энергия не приходит. Её делают.",
+          "12 минут — это не спорт. Это уважение к себе.",
+          "Ты хотел ‘мотивацию’. Вот она: сделай."
+        ]
+      },
+
+      // SOCIAL
+      {
+        id:"social-1", theme:"social", difficulty:"Страшно-полезно",
+        title:"Напиши 10 людям. Не ‘привет’. А нормально.",
+        hook:"Контакты = реальность. Молчание = болото.",
+        reality:"Социалка — это навык, а не судьба.",
+        eta:"20–40 мин",
+        proof:"скрин списка (без личных данных)",
+        steps:[
+          {t:"Составь 1 шаблон сообщения.", d:"Коротко: кто ты + что предлагаешь/спрашиваешь."},
+          {t:"Отправь 10 сообщений.", d:"Работа/коллаб/продажа/общение — не важно. Важно: 10."},
+          {t:"Запиши ответы/тишину.", d:"Тишина — тоже результат."},
+          {t:"Сделай 1 follow-up завтра.", d:"План на завтра = власть."}
+        ],
+        roast:[
+          "Ты не интроверт. Ты не тренировался.",
+          "10 сообщений — это 10 дверей.",
+          "Кто пишет — получает."
+        ]
+      },
+
+      // CLEAN
+      {
+        id:"clean-1", theme:"clean", difficulty:"Просто-гениально",
+        title:"Уничтожь 100 вещей-мусора за 25 минут.",
+        hook:"Хаос в комнате = хаос в голове. Давай быстро.",
+        reality:"Порядок — самый дешёвый психолог.",
+        eta:"25–30 мин",
+        proof:"фото ‘до/после’ (по желанию)",
+        steps:[
+          {t:"Поставь таймер на 25 минут.", d:"Не думай. Делай."},
+          {t:"Собери 1 пакет мусора/ненужного.", d:"Без философии."},
+          {t:"Убери 1 поверхность полностью.", d:"Стол/полка/тумба."},
+          {t:"Остановись. Запиши результат.", d:"Пруф: ‘сделал’."}
+        ],
+        roast:[
+          "Ты не уставший. Ты окружён мусором.",
+          "Чистая поверхность = чистая скорость.",
+          "Пакет мусора = победа."
+        ]
+      },
+
+      // CREATOR
+      {
+        id:"creator-1", theme:"creator", difficulty:"Вирусно-реально",
+        title:"Сделай 1 Short (10–20 сек) и выложи.",
+        hook:"Ты не ‘готовишься’. Ты выпускаешь. Сегодня.",
+        reality:"Контент — это серия. Не настроение.",
+        eta:"30–75 мин",
+        proof:"ссылка на пост/черновик",
+        steps:[
+          {t:"Выбери 1 мысль/факт.", d:"Один удар. Не лекция."},
+          {t:"Запиши голос/текст (10–20 сек).", d:"Просто. Живым языком."},
+          {t:"Собери монтаж на минималках.", d:"Один фон, один текст, одна музыка."},
+          {t:"Выложи или поставь публикацию.", d:"Пруф — ссылка/скрин."}
+        ],
+        roast:[
+          "Если не выкладываешь — ты не автор. Ты зритель.",
+          "Один ролик — это одна попытка удачи.",
+          "Серия побеждает перфекционизм."
+        ]
+      }
+    ];
+
+    // Extra spice: funny taglines generator
+    const TAGS = [
+      "без нытья",
+      "без магии",
+      "без ‘завтра’",
+      "без клоунады",
+      "с доказательством",
+      "с болью, но честно",
+      "как взрослый"
+    ];
+
+    const state = {
+      boss: null,
+      mission: null,
+      startedAt: null,
+      endsAt: null,
+      durationHours: 24,
+      checklist: [],
+      points: 0,
+      mode: "safe",
+      theme: "mixed",
+      cringe: 35
+    };
+
+    let tickInterval = null;
+
+    function saveState(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    function loadState(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return false;
+      try{
+        const s = JSON.parse(raw);
+        Object.assign(state, s);
+        return true;
+      }catch(e){ return false; }
+    }
+
+    function toast(msg){
+      const t = $("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(()=> t.classList.remove("show"), 1500);
+    }
+
+    function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+
+    function setBoss(){
+      state.boss = state.boss || rand(bossNames);
+      $("bossName").textContent = "BOSS: " + state.boss;
+    }
+
+    function filteredMissions(){
+      const theme = state.theme;
+      let pool = MISSIONS.slice();
+
+      if(theme !== "mixed"){
+        pool = pool.filter(m => m.theme === theme);
+      }
+
+      // Cringe filter: чем выше % — тем менее “мемно” и “рискованно”
+      // Мы грубо: MEME LORD даёт больше "creator/social" и roast-линий, SAFE — более "skills/clean/health".
+      const c = state.cringe;
+
+      if(state.mode === "meme"){
+        // меньше фильтра, больше шизы
+        if(c > 60){
+          pool = pool.filter(m => m.theme !== "social"); // чуть меньше рисков
+        }
+      } else if(state.mode === "hard"){
+        // hard = больше skills/money/clean
+        if(c > 30) pool = pool.filter(m => ["skills","money","clean","health","creator"].includes(m.theme));
+      } else {
+        // safe
+        if(c > 25) pool = pool.filter(m => m.theme !== "social");
+      }
+
+      return pool.length ? pool : MISSIONS.slice();
+    }
+
+    function pickMission(){
+      const pool = filteredMissions();
+
+      // "Безумная" деталь: слегка подмешиваем тег, чтобы миссия выглядела как "приказ"
+      const m = rand(pool);
+      const tag = rand(TAGS);
+
+      return {
+        ...m,
+        tag,
+        // roastLine будет выбираться динамически
+      };
+    }
+
+    function renderMission(){
+      const m = state.mission;
+      if(!m){
+        $("mTitle").textContent = "Пока пусто. Нажми кнопку.";
+        $("mHook").textContent = "Сайт не будет тебя вдохновлять. Он будет тебя толкать.";
+        $("metaRow").style.display = "none";
+        $("timerBox").style.display = "none";
+        $("progressBox").style.display = "none";
+        $("statusLabel").textContent = "готов к нажатию";
+        return;
+      }
+
+      $("mTitle").textContent = m.title + " · " + "«" + m.tag + "»";
+      $("mHook").textContent = m.hook;
+
+      $("mEta").textContent = m.eta;
+      $("mDifficulty").textContent = m.difficulty;
+      $("mProof").textContent = m.proof;
+      $("mReality").textContent = m.reality;
+
+      $("metaRow").style.display = "flex";
+      $("progressBox").style.display = "block";
+
+      // Checklist
+      const list = $("checklist");
+      list.innerHTML = "";
+      m.steps.forEach((s, idx) => {
+        const checked = !!state.checklist[idx];
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <input type="checkbox" ${checked ? "checked": ""} data-idx="${idx}">
+          <div>
+            <b>${escapeHtml(s.t)}</b>
+            <small>${escapeHtml(s.d)}</small>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+
+      // Wire checkboxes
+      list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener("change", (e)=>{
+          const i = Number(e.target.dataset.idx);
+          state.checklist[i] = e.target.checked;
+
+          // points system
+          if(e.target.checked){
+            state.points += 25;
+            toast("+25 Boss Points");
+          }else{
+            state.points = Math.max(0, state.points - 15);
+            toast("-15 (вернул шаг обратно)");
+          }
+          saveState();
+          updateProgressUI();
+        });
+      });
+
+      $("statusLabel").textContent = state.startedAt ? "миссия идёт" : "миссия готова (запусти таймер)";
+      updateProgressUI();
+      renderShareCanvas(); // keep fresh
+    }
+
+    function updateProgressUI(){
+      const m = state.mission;
+      if(!m) return;
+
+      const done = state.checklist.filter(Boolean).length;
+      const total = m.steps.length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+
+      $("progressText").textContent = `${done}/${total} выполнено · ${pct}%`;
+      $("fill").style.width = pct + "%";
+      $("points").textContent = String(state.points);
+
+      // roast line: чем меньше прогресс — тем злее
+      let roast = rand(m.roast);
+      if(pct >= 100){
+        roast = "ЗАКРЫТО. Ты сделал. Теперь покажи пруф миру.";
+      } else if(pct >= 60){
+        roast = "Нормально. Теперь не слей на финише.";
+      } else if(pct >= 25){
+        roast = "Ты в процессе. Не делай вид, что это ‘почти сделано’.";
+      } else {
+        roast = rand(m.roast);
+      }
+      $("roastLine").textContent = roast;
+
+      // Timer box visibility
+      $("timerBox").style.display = state.startedAt ? "flex" : "none";
+      $("canvasWrap").style.display = "none";
+    }
+
+    function startTimer(){
+      if(!state.mission){
+        toast("Сначала сгенерь миссию.");
+        return;
+      }
+      if(state.startedAt){
+        toast("Таймер уже идёт.");
+        return;
+      }
+      const hours = state.durationHours;
+      state.startedAt = now();
+      state.endsAt = state.startedAt + hours * 60 * 60 * 1000;
+      $("statusLabel").textContent = "миссия идёт";
+      saveState();
+      runTicker();
+      toast("Таймер запущен. Теперь без отмазок.");
+    }
+
+    function runTicker(){
+      if(tickInterval) clearInterval(tickInterval);
+      tickInterval = setInterval(()=>{
+        if(!state.endsAt){
+          $("timeLeft").textContent = "—:—:—";
+          return;
+        }
+        const ms = state.endsAt - now();
+        if(ms <= 0){
+          $("timeLeft").textContent = "00:00:00";
+          $("statusLabel").textContent = "время вышло (но можно добить)";
+          // bonus: if finished, more points
+          if(state.mission && state.checklist.filter(Boolean).length === state.mission.steps.length){
+            // already complete
+          }
+          return;
+        }
+        $("timeLeft").textContent = formatHMS(ms);
+      }, 250);
+    }
+
+    function formatHMS(ms){
+      const s = Math.floor(ms/1000);
+      const h = Math.floor(s/3600);
+      const m = Math.floor((s%3600)/60);
+      const ss = s%60;
+      return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(ss).padStart(2,"0");
+    }
+
+    function resetAll(){
+      localStorage.removeItem(STORAGE_KEY);
+      Object.assign(state, {
+        boss: null,
+        mission: null,
+        startedAt: null,
+        endsAt: null,
+        durationHours: 24,
+        checklist: [],
+        points: 0,
+        mode: "safe",
+        theme: "mixed",
+        cringe: 35
+      });
+      $("postOut").value = "";
+      $("doneText").value = "";
+      $("resultText").value = "";
+      $("pain").selectedIndex = 0;
+      setBoss();
+      syncControls();
+      renderMission();
+      runTicker();
+      toast("Сброшено. Чистый лист.");
+    }
+
+    function generateMission(){
+      // lock: if mission running, don't override
+      if(state.startedAt){
+        toast("Миссия уже идёт. Сначала сброс или добей.");
+        return;
+      }
+      state.mission = pickMission();
+      state.checklist = new Array(state.mission.steps.length).fill(false);
+      state.points = 0;
+      saveState();
+      renderMission();
+      toast("Миссия получена. Запускай таймер.");
+    }
+
+    function reroll(){
+      if(state.startedAt){
+        toast("Нельзя рероллить во время таймера.");
+        return;
+      }
+      if(!state.mission){
+        toast("Сначала сгенерь миссию.");
+        return;
+      }
+      generateMission();
+      toast("Реролл. Новая реальность выдана.");
+    }
+
+    function buildPost(extraSpicy=false){
+      const m = state.mission;
+      if(!m){
+        toast("Сначала миссия.");
+        return;
+      }
+      const done = $("doneText").value.trim();
+      const res = $("resultText").value.trim();
+      const pain = $("pain").value;
+
+      const progress = m ? `${state.checklist.filter(Boolean).length}/${m.steps.length}` : "—";
+      const pts = state.points;
+
+      const spice1 = extraSpicy
+        ? "Сегодня я нажал кнопку и понял: мозг любит говорить, но реальность любит чекбоксы."
+        : "Сегодня я нажал кнопку. Без мотивации. Просто сделал.";
+
+      const spice2 = extraSpicy
+        ? "Если ты тоже ‘готовишься’ — поздравляю, ты в режиме NPC. Жми кнопку и выйди из меню."
+        : "Если ты тоже залипаешь — попробуй 1 миссию. Не философию.";
+
+      const proofLine = m.proof.toLowerCase().includes("ссылка")
+        ? "Пруф: ссылка/скрин готов."
+        : "Пруф: есть (не буду врать).";
+
+      const msg =
+`${spice1}
+
+Миссия: ${m.title}
+Прогресс: ${progress} ✅
+Результат: ${res || "есть движение"} (${pain})
+Boss Points: ${pts} ⚡
+
+Что сделал: ${done || "сделал шаги, не красиво, но честно."}
+${proofLine}
+
+${spice2}`;
+
+      return msg.trim();
+    }
+
+    function copy(text){
+      navigator.clipboard.writeText(text).then(()=>{
+        toast("Скопировано.");
+      }).catch(()=>{
+        toast("Не смог скопировать (браузер).");
+      });
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function renderShareCanvas(){
+      const c = $("shareCanvas");
+      const ctx = c.getContext("2d");
+      const w = c.width, h = c.height;
+
+      // background
+      const g1 = ctx.createRadialGradient(w*0.2, h*0.15, 40, w*0.2, h*0.15, w*0.9);
+      g1.addColorStop(0, "rgba(122,168,255,0.18)");
+      g1.addColorStop(1, "rgba(0,0,0,0)");
+      const g2 = ctx.createRadialGradient(w*0.85, h*0.2, 40, w*0.85, h*0.2, w*0.9);
+      g2.addColorStop(0, "rgba(72,255,184,0.14)");
+      g2.addColorStop(1, "rgba(0,0,0,0)");
+
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle = "#0b0f14";
+      ctx.fillRect(0,0,w,h);
+      ctx.fillStyle = g1; ctx.fillRect(0,0,w,h);
+      ctx.fillStyle = g2; ctx.fillRect(0,0,w,h);
+
+      // subtle grid
+      ctx.globalAlpha = 0.16;
+      ctx.strokeStyle = "rgba(255,255,255,0.10)";
+      ctx.lineWidth = 1;
+      for(let x=60; x<w; x+=60){
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+      }
+      for(let y=60; y<h; y+=60){
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // card
+      const pad = 56;
+      const cardX = pad, cardY = pad, cardW = w - pad*2, cardH = h - pad*2;
+
+      roundRect(ctx, cardX, cardY, cardW, cardH, 34, "rgba(255,255,255,0.06)", "rgba(255,255,255,0.10)");
+
+      // header
+      ctx.font = "700 28px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+      ctx.fillStyle = "rgba(255,255,255,0.78)";
+      ctx.fillText("BROKE → BOSS", cardX+34, cardY+58);
+
+      const m = state.mission;
+      const boss = state.boss || "???";
+      ctx.font = "600 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+      ctx.fillStyle = "rgba(255,255,255,0.62)";
+      ctx.fillText("BOSS: " + boss, cardX+34, cardY+86);
+
+      // mission title
+      ctx.font = "800 40px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+      ctx.fillStyle = "rgba(255,255,255,0.92)";
+      const title = m ? m.title : "Нажми кнопку → получи миссию";
+      wrapText(ctx, title, cardX+34, cardY+150, cardW-68, 46);
+
+      // progress bar
+      const total = m ? m.steps.length : 1;
+      const done = m ? state.checklist.filter(Boolean).length : 0;
+      const pct = m ? (done/total) : 0;
+      const barX = cardX+34, barY = cardY+cardH-150, barW = cardW-68, barH = 18;
+
+      roundRect(ctx, barX, barY, barW, barH, 999, "rgba(255,255,255,0.10)", "rgba(255,255,255,0.12)");
+      const grad = ctx.createLinearGradient(barX,0,barX+barW,0);
+      grad.addColorStop(0, "rgba(72,255,184,0.95)");
+      grad.addColorStop(0.5, "rgba(122,168,255,0.90)");
+      grad.addColorStop(1, "rgba(255,184,107,0.95)");
+      roundRect(ctx, barX, barY, Math.max(16, barW*pct), barH, 999, grad, "rgba(0,0,0,0)");
+
+      // stats
+      ctx.font = "700 22px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+      ctx.fillStyle = "rgba(255,255,255,0.88)";
+      ctx.fillText(`Progress: ${done}/${total}`, barX, barY+52);
+
+      ctx.fillText(`Boss Points: ${state.points}`, barX+340, barY+52);
+
+      const left = state.endsAt ? Math.max(0, state.endsAt - now()) : 0;
+      const tl = state.startedAt ? formatHMS(left) : "not started";
+      ctx.fillText(`Time left: ${tl}`, barX+700, barY+52);
+
+      // footer
+      ctx.font = "600 16px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+      ctx.fillStyle = "rgba(255,255,255,0.60)";
+      ctx.fillText("Сделано на GitHub Pages • 100% local • Никаких серверов", barX, cardY+cardH-36);
+    }
+
+    function roundRect(ctx, x, y, w, h, r, fill, stroke){
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.arcTo(x+w, y, x+w, y+h, r);
+      ctx.arcTo(x+w, y+h, x, y+h, r);
+      ctx.arcTo(x, y+h, x, y, r);
+      ctx.arcTo(x, y, x+w, y, r);
+      ctx.closePath();
+      if(fill){
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+      if(stroke){
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+      const words = String(text).split(" ");
+      let line = "";
+      let yy = y;
+      for(let n=0; n<words.length; n++){
+        const testLine = line + words[n] + " ";
+        const metrics = ctx.measureText(testLine);
+        if(metrics.width > maxWidth && n>0){
+          ctx.fillText(line, x, yy);
+          line = words[n] + " ";
+          yy += lineHeight;
+          if(yy > y + lineHeight*3.4){ // limit lines
+            ctx.fillText("…", x, yy);
+            return;
+          }
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, yy);
+    }
+
+    async function shareCard(){
+      renderShareCanvas();
+      $("canvasWrap").style.display = "block";
+      const c = $("shareCanvas");
+
+      // Try Web Share API with file
+      if(navigator.share && c.toBlob){
+        c.toBlob(async (blob)=>{
+          try{
+            const file = new File([blob], "broke-to-boss.png", {type:"image/png"});
+            await navigator.share({
+              title: "BROKE → BOSS",
+              text: "Жми кнопку → получи миссию → пруф.",
+              files: [file]
+            });
+            toast("Шэр отправлен.");
+          }catch(e){
+            toast("Шэр отменён или не поддерживается.");
+          }
+        }, "image/png");
+      } else {
+        toast("Открыл карточку. Сохрани/скринни и кидай.");
+      }
+    }
+
+    function copyLink(){
+      const url = location.href;
+      copy(url);
+    }
+
+    function syncControls(){
+      $("mode").value = state.mode;
+      $("theme").value = state.theme;
+      $("duration").value = String(state.durationHours);
+      $("cringe").value = String(state.cringe);
+      $("cringeLabel").textContent = state.cringe + "%";
+      $("modeLabel").textContent =
+        state.mode === "safe" ? "SAFE CHAOS" :
+        state.mode === "hard" ? "HARD MODE" : "MEME LORD";
+    }
+
+    // Event wiring
+    $("btnGenerate").addEventListener("click", ()=>{
+      state.mode = $("mode").value;
+      state.theme = $("theme").value;
+      state.durationHours = Number($("duration").value);
+      state.cringe = Number($("cringe").value);
+      saveState();
+      syncControls();
+      generateMission();
+      renderShareCanvas();
+    });
+
+    $("btnStart").addEventListener("click", ()=>{
+      state.durationHours = Number($("duration").value);
+      saveState();
+      startTimer();
+      updateProgressUI();
+      renderShareCanvas();
+    });
+
+    $("btnReroll").addEventListener("click", ()=>{
+      state.mode = $("mode").value;
+      state.theme = $("theme").value;
+      state.cringe = Number($("cringe").value);
+      saveState();
+      syncControls();
+      reroll();
+      renderShareCanvas();
+    });
+
+    $("btnReset").addEventListener("click", resetAll);
+
+    $("cringe").addEventListener("input", (e)=>{
+      state.cringe = Number(e.target.value);
+      $("cringeLabel").textContent = state.cringe + "%";
+      saveState();
+    });
+
+    $("mode").addEventListener("change", ()=>{
+      state.mode = $("mode").value;
+      $("modeLabel").textContent =
+        state.mode === "safe" ? "SAFE CHAOS" :
+        state.mode === "hard" ? "HARD MODE" : "MEME LORD";
+      saveState();
+    });
+
+    $("theme").addEventListener("change", ()=>{
+      state.theme = $("theme").value;
+      saveState();
+    });
+
+    $("duration").addEventListener("change", ()=>{
+      state.durationHours = Number($("duration").value);
+      saveState();
+    });
+
+    $("btnMakePost").addEventListener("click", ()=>{
+      const text = buildPost(false);
+      $("postOut").value = text;
+      toast("Пост собран.");
+    });
+
+    $("btnMakeInsult").addEventListener("click", ()=>{
+      const text = buildPost(true);
+      $("postOut").value = text;
+      toast("Пост стал злее и смешнее.");
+    });
+
+    $("btnCopyPost").addEventListener("click", ()=>{
+      const t = $("postOut").value.trim();
+      if(!t) return toast("Сначала собери пост.");
+      copy(t);
+    });
+
+    $("btnReport").addEventListener("click", ()=>{
+      const base = buildPost(false);
+      $("postOut").value = base;
+      toast("Отчёт/пост готов.");
+    });
+
+    $("btnShare").addEventListener("click", shareCard);
+    $("btnCopyLink").addEventListener("click", copyLink);
+
+    // Init
+    (function init(){
+      loadState();
+      setBoss();
+      syncControls();
+
+      // If we have a mission but no boss, ensure boss exists
+      if(!state.boss) setBoss();
+
+      renderMission();
+      runTicker();
+
+      // If timer running, show it
+      if(state.startedAt){
+        $("timerBox").style.display = "flex";
+        $("statusLabel").textContent = "миссия идёт";
+      }
+
+      // Keep canvas up to date
+      renderShareCanvas();
+    })();
+  </script>
+</body>
+</html>
