@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Outbreak Link</title>
+
   <style>
     :root{
       --bg:#05070B;
@@ -23,8 +24,7 @@
     /* premium scanlines + grain */
     #app::before{
       content:""; position:absolute; inset:-20px; pointer-events:none;
-      background:
-        repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 1px 6px);
+      background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 1px 6px);
       opacity:.08; mix-blend-mode:overlay;
     }
     #app::after{
@@ -33,6 +33,35 @@
       background-size: 3px 3px;
       opacity:.06;
       mix-blend-mode:overlay;
+    }
+
+    /* ---------- FORCE LANDSCAPE UX (iOS can't truly force rotate, so we guide + try lock) ---------- */
+    #rotateOverlay{
+      position:fixed; inset:0; z-index:9999;
+      display:none; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.86); color:var(--t1);
+      text-align:center; padding:24px;
+    }
+    #rotateOverlay .box{
+      max-width:560px;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:22px;
+      padding:18px 16px;
+      backdrop-filter: blur(10px);
+      box-shadow:0 22px 90px rgba(0,0,0,.55);
+    }
+    #rotateOverlay .t{
+      letter-spacing:.18em;text-transform:uppercase;font-weight:950;font-size:18px;margin:0 0 10px;
+    }
+    #rotateOverlay .s{
+      opacity:.75;line-height:1.5;margin:0;
+    }
+    @media (orientation: portrait){
+      #rotateOverlay{display:flex;}
+    }
+    @media (orientation: landscape){
+      #rotateOverlay{display:none;}
     }
 
     /* ---------- SCREENS ---------- */
@@ -100,12 +129,19 @@
       background:#000;
       filter:saturate(1.05) contrast(1.05);
     }
+    .introShade{
+      position:absolute; inset:0;
+      background:radial-gradient(110% 80% at 50% 10%, rgba(69,255,117,.14), rgba(0,0,0,.76));
+      pointer-events:none;
+      mix-blend-mode:overlay;
+    }
     .introHUD{
       position:absolute; inset:0;
       display:flex; align-items:flex-end; justify-content:space-between;
       padding:18px;
       pointer-events:none;
       gap:14px;
+      z-index:10;
     }
     .introTag{
       pointer-events:none;
@@ -120,11 +156,14 @@
     .tagTitle{margin:0 0 6px;letter-spacing:.14em;text-transform:uppercase;font-weight:950}
     .tagSub{margin:0;color:var(--t2);line-height:1.45}
     .btnRow{display:flex;gap:10px;pointer-events:auto}
-    .introShade{
-      position:absolute; inset:0;
-      background:radial-gradient(110% 80% at 50% 10%, rgba(69,255,117,.14), rgba(0,0,0,.76));
-      pointer-events:none;
-      mix-blend-mode:overlay;
+
+    #soundBtn{
+      position:absolute; right:18px; top:18px; z-index:20;
+      padding:12px 14px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.45); color:var(--t1);
+      letter-spacing:.10em; text-transform:uppercase; font-weight:900;
+      backdrop-filter: blur(10px);
     }
 
     /* ---------- LOBBY ---------- */
@@ -152,7 +191,7 @@
 
     .lobbyTop{position:absolute; top:16px; left:16px; right:16px; display:flex; justify-content:space-between; gap:12px; z-index:5}
     .playerCard{
-      width:min(380px,92vw);
+      width:min(420px,92vw);
       background:var(--panel);
       border:1px solid var(--border);
       border-radius:20px;
@@ -174,7 +213,7 @@
       padding:24px;
     }
     .titleStack{
-      width:min(640px,92vw);
+      width:min(720px,92vw);
       text-align:center;
       padding:14px 16px;
       border-radius:22px;
@@ -340,13 +379,13 @@
     .statVal{font-size:30px;font-weight:950;letter-spacing:.04em;margin-top:4px}
     .divider{height:1px;background:rgba(255,255,255,.10);margin:6px 0}
     .smallNote{font-size:12px;color:rgba(234,247,241,.58);line-height:1.5}
-
     .resultActions{display:flex;gap:10px;flex-wrap:wrap}
     .resultActions .btn{flex:1;min-width:220px}
 
     /* safe areas */
     @supports(padding:max(0px)){
       .introHUD{padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));}
+      #soundBtn{right:max(18px, env(safe-area-inset-right)); top:max(18px, env(safe-area-inset-top));}
       .tabbar{left:max(12px, env(safe-area-inset-left));right:max(12px, env(safe-area-inset-right));bottom:max(12px, env(safe-area-inset-bottom));}
       .drawer{left:max(12px, env(safe-area-inset-left));right:max(12px, env(safe-area-inset-right));bottom:calc(max(90px, env(safe-area-inset-bottom) + 78px));}
       .lobbyTop{left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));top:max(16px, env(safe-area-inset-top));}
@@ -355,8 +394,17 @@
     }
   </style>
 </head>
+
 <body>
   <div id="app">
+
+    <!-- Rotate helper (portrait) -->
+    <div id="rotateOverlay">
+      <div class="box">
+        <p class="t">Rotate to Landscape</p>
+        <p class="s">Turn on Auto-Rotate and rotate your phone for the full game experience.</p>
+      </div>
+    </div>
 
     <!-- BOOT -->
     <div class="screen active" id="boot">
@@ -364,7 +412,7 @@
         <h1 class="logo">OUTBREAK LINK</h1>
         <p class="bootText">Booting containment protocol…</p>
         <div class="bar"><div class="fill" id="bootFill"></div></div>
-        <div class="tiny">v0.3 • arcade feel + share card</div>
+        <div class="tiny">v0.4 • landscape guide + intro sound unlock</div>
       </div>
     </div>
 
@@ -372,6 +420,9 @@
     <div class="screen" id="intro">
       <video class="introVideo" id="introVideo" playsinline muted autoplay></video>
       <div class="introShade"></div>
+
+      <button id="soundBtn">TAP FOR SOUND</button>
+
       <div class="introHUD">
         <div class="introTag">
           <div class="tagTitle">THE VIRUS IS THE LINK.</div>
@@ -564,6 +615,34 @@
       screens[name].classList.add('active','fadeIn');
     }
 
+    // ---------- HELPERS ----------
+    function haptic(ms=20){ if (navigator.vibrate) navigator.vibrate(ms); }
+
+    // Clipboard: best effort, fallback prompt if blocked (esp. iOS / non-https)
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        return true;
+      }catch(e){
+        try{ window.prompt("Copy this:", text); }catch(_) {}
+        return false;
+      }
+    }
+
+    // Try to lock landscape (works best on Android; iOS often ignores; still safe)
+    async function tryLockLandscape(){
+      try{
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      }catch(e){}
+      try{
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock('landscape');
+        }
+      }catch(e){}
+    }
+
     // ---------- SIMPLE SFX (no files) ----------
     const audioCtx = (()=> {
       try { return new (window.AudioContext||window.webkitAudioContext)(); } catch(e){ return null; }
@@ -582,9 +661,6 @@
       g.gain.exponentialRampToValueAtTime(0.0001, t+0.12);
       o.start(t); o.stop(t+0.13);
     }
-    function haptic(ms=20){
-      if (navigator.vibrate) navigator.vibrate(ms);
-    }
 
     // ---------- ID / REF ----------
     const LS_ID='ol_id', LS_BEST='ol_best', LS_BY='ol_by', LS_CREATOR='ol_creator', LS_COUNTRY='ol_country';
@@ -593,9 +669,7 @@
       const u=new URL(window.location.href);
       return { ref:u.searchParams.get('ref'), creator:u.searchParams.get('creator') };
     }
-    function baseUrl(){
-      return window.location.href.split('#')[0].split('?')[0];
-    }
+    function baseUrl(){ return window.location.href.split('#')[0].split('?')[0]; }
     function getOrCreateId(){
       const p=params();
       if (p.creator==='1') localStorage.setItem(LS_CREATOR,'1');
@@ -623,8 +697,6 @@
       if(!c){ c='AT'; localStorage.setItem(LS_COUNTRY,c); }
       return c;
     }
-
-    // ---------- UI UPDATE ----------
     function updateLobbyUI(){
       const id=getOrCreateId();
       const by=localStorage.getItem(LS_BY) || '------';
@@ -636,11 +708,6 @@
       document.getElementById('uiSeason').textContent = `Month #${new Date().getMonth()+1}`;
     }
 
-    async function copyText(text){
-      try{ await navigator.clipboard.writeText(text); return true; }
-      catch(e){ return false; }
-    }
-
     // ---------- BOOT ----------
     const bootFill=document.getElementById('bootFill');
     let bp=0;
@@ -649,26 +716,61 @@
       if(bp>=100){ clearInterval(bt); startIntro(); }
     }, 55);
 
-    // ---------- INTRO ----------
+    // ---------- INTRO (SOUND UNLOCK) ----------
     const introVideo=document.getElementById('introVideo');
+    const soundBtn=document.getElementById('soundBtn');
+    let audioUnlocked = false;
+
+    async function unlockIntroAudio(){
+      if (audioUnlocked) return;
+      audioUnlocked = true;
+
+      // also a good place to try landscape lock because it's a user gesture
+      tryLockLandscape();
+
+      try{
+        introVideo.muted = false;
+        introVideo.volume = 1;
+        // iOS needs play() inside gesture to allow audio
+        await introVideo.play();
+        soundBtn.style.display = 'none';
+      }catch(e){
+        audioUnlocked = false;
+        // keep button visible so user can tap again
+      }
+    }
+
     function startIntro(){
       initRef();
       updateLobbyUI();
       show('intro');
       introVideo.src='assets/video/intro.mp4';
+
+      // Attempt autoplay muted (allowed)
+      try{ introVideo.play(); }catch(e){}
+
+      // If video ends -> go login
       introVideo.addEventListener('ended', ()=>goLogin(), {once:true});
-      // iOS may block autoplay; buttons still work.
     }
-    function goLogin(){ try{ introVideo.pause(); }catch(e){} show('login'); }
-    document.getElementById('skipBtn').onclick = ()=>{ beep('click'); goLogin(); };
-    document.getElementById('enterBtn').onclick= ()=>{ beep('click'); goLogin(); };
+
+    function goLogin(){
+      try{ introVideo.pause(); }catch(e){}
+      show('login');
+    }
+
+    soundBtn.addEventListener('click', ()=>{ beep('click'); unlockIntroAudio(); });
+    // Also: first tap anywhere on intro unlocks sound
+    document.getElementById('intro').addEventListener('pointerdown', ()=>{ unlockIntroAudio(); }, { once:true });
+
+    document.getElementById('skipBtn').onclick = async ()=>{ beep('click'); await tryLockLandscape(); goLogin(); };
+    document.getElementById('enterBtn').onclick= async ()=>{ beep('click'); await tryLockLandscape(); goLogin(); };
 
     // ---------- LOGIN ----------
     document.getElementById('googleBtn').onclick = ()=> alert('Google login later (backend).');
     document.getElementById('tgBtn').onclick     = ()=> alert('Telegram login later (backend).');
-    document.getElementById('guestBtn').onclick  = ()=>{ beep('click'); updateLobbyUI(); show('lobby'); };
+    document.getElementById('guestBtn').onclick  = async ()=>{ beep('click'); await tryLockLandscape(); updateLobbyUI(); show('lobby'); };
 
-    // ---------- LOBBY DRAWER ----------
+    // ---------- LOBBY DRAWER / TABS ----------
     const drawer=document.getElementById('drawer');
     const drawerTitle=document.getElementById('drawerTitle');
     const drawerBody=document.getElementById('drawerBody');
@@ -701,13 +803,13 @@
         </div>
         <div class="mini">Tip: post the share-card image + link. It spreads faster than text.</div>
       `);
+
       document.getElementById('copyLinkBtn').onclick=async()=>{
         beep('click');
         const ok=await copyText(link);
         if(ok){ haptic(15); beep('good'); }
       };
       document.getElementById('openTgBtn').onclick=()=>{
-        // put your handles here later; leaving as placeholders to avoid raw urls in chat
         alert('Later: we will put your TG channel + bot links here.');
       };
     }
@@ -737,16 +839,17 @@
         <div class="field mono" style="margin-top:8px">#3  INFECTED #000905 — 99 infections</div>
       `);
     }
+
     document.getElementById('tab_infect').onclick=()=>{ beep('click'); tabInfect(); };
     document.getElementById('tab_world').onclick =()=>{ beep('click'); tabWorld(); };
     document.getElementById('tab_lineage').onclick=()=>{ beep('click'); tabLineage(); };
     document.getElementById('tab_top').onclick   =()=>{ beep('click'); tabTop(); };
 
-    // quick copy button
+    // quick copy link
     document.getElementById('quickInfectBtn').onclick = async ()=>{
       const id=getOrCreateId();
       const ok=await copyText(infectLink(id));
-      if(ok){ haptic(20); beep('good'); }
+      if(ok){ haptic(18); beep('good'); }
       else { beep('click'); }
     };
 
@@ -766,7 +869,7 @@
     let running=false, raf=0, last=0;
     let timeLeft=45, score=0, combo=0, panic=0.15, spawnT=0;
     let pointer={x:120,y:120, vx:0, vy:0};
-    let ents=[]; // {x,y,vx,vy,r,bad,life}
+    let ents=[];   // {x,y,vx,vy,r,bad,life}
     let sparks=[]; // particles
 
     function resizeCanvas(){
@@ -859,7 +962,7 @@
       const interval = 0.30 - (1-timeLeft/45)*0.11; // 0.30 -> 0.19
       while(spawnT >= interval){ spawnT -= interval; spawnEnt(); }
 
-      // move ents
+      // move entities
       const rect=wrap.getBoundingClientRect();
       const w=rect.width, h=rect.height;
 
@@ -868,7 +971,7 @@
       }
       ents = ents.filter(e=> e.life>0 && e.x>-90 && e.x<w+90 && e.y>-90 && e.y<h+90);
 
-      // smooth pointer (feels like gamepad)
+      // smooth pointer
       pointer.x += pointer.vx * dt;
       pointer.y += pointer.vy * dt;
 
@@ -927,7 +1030,7 @@
       g.addColorStop(1,'rgba(0,0,0,0.72)');
       ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
 
-      // ents
+      // entities
       for(const e of ents){
         ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.closePath();
         if(e.bad){
@@ -964,9 +1067,8 @@
       const tx=Math.max(0, Math.min(rect.width,  cx-rect.left));
       const ty=Math.max(0, Math.min(rect.height, cy-rect.top));
 
-      // velocity points toward target (smooth)
       const dx=tx-pointer.x, dy=ty-pointer.y;
-      pointer.vx = dx*10; // springy feel
+      pointer.vx = dx*10;
       pointer.vy = dy*10;
     }
 
@@ -1008,6 +1110,8 @@
       const {id, score, best, country} = data;
       const W=shareCanvas.width, H=shareCanvas.height;
 
+      sctx.clearRect(0,0,W,H);
+
       // background
       if(templateReady){
         sctx.drawImage(templateImg, 0,0,W,H);
@@ -1045,9 +1149,9 @@
       sctx.font='900 40px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
       sctx.fillText(`BEST: ${best}`, 70, 520);
 
+      const link=infectLink(id);
       sctx.fillStyle='rgba(234,247,241,0.60)';
       sctx.font='900 26px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-      const link=infectLink(id);
       wrapText(sctx, link, 70, 1180, 940, 32);
 
       sctx.fillStyle='rgba(234,247,241,0.58)';
@@ -1056,16 +1160,18 @@
     }
 
     function wrapText(ctx, text, x, y, maxWidth, lineHeight){
-      const words=text.split(' ');
-      let line='';
-      for(let n=0;n<words.length;n++){
-        const testLine=line+words[n]+' ';
-        const m=ctx.measureText(testLine).width;
-        if(m>maxWidth && n>0){
+      // simple wrap by measuring
+      const words = text.split(' ');
+      let line = '';
+      for (let n=0;n<words.length;n++){
+        const testLine = line + words[n] + ' ';
+        if (ctx.measureText(testLine).width > maxWidth && n>0){
           ctx.fillText(line, x, y);
-          line=words[n]+' ';
-          y+=lineHeight;
-        }else line=testLine;
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
       }
       ctx.fillText(line, x, y);
     }
@@ -1080,21 +1186,9 @@
       a.remove();
     }
 
-    // ---------- start in login from intro ----------
-    // (already wired)
-
-    // ---------- tabs ----------
-    document.getElementById('tab_infect').onclick = ()=>{ beep('click'); tabInfect(); };
-    document.getElementById('tab_world').onclick  = ()=>{ beep('click'); tabWorld(); };
-    document.getElementById('tab_lineage').onclick= ()=>{ beep('click'); tabLineage(); };
-    document.getElementById('tab_top').onclick    = ()=>{ beep('click'); tabTop(); };
-
-    // also copy link from lobby cta
-    document.getElementById('quickInfectBtn').onclick = async ()=>{
-      const id=getOrCreateId();
-      const ok=await copyText(infectLink(id));
-      if(ok){ haptic(18); beep('good'); }
-    };
+    // ---------- Start / small hooks ----------
+    // Try to lock landscape on the FIRST interaction anywhere
+    window.addEventListener('pointerdown', () => { tryLockLandscape(); }, { once:true });
 
   </script>
 </body>
