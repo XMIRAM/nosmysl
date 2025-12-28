@@ -20,20 +20,30 @@
     html,body{height:100%;margin:0;background:var(--bg);color:var(--t1);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
     #app{position:fixed;inset:0;overflow:hidden}
 
-    /* subtle “game feel” overlay */
+    /* premium scanlines + grain */
     #app::before{
       content:""; position:absolute; inset:-20px; pointer-events:none;
-      background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 1px 6px);
+      background:
+        repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 1px 6px);
       opacity:.08; mix-blend-mode:overlay;
+    }
+    #app::after{
+      content:""; position:absolute; inset:0; pointer-events:none;
+      background-image:radial-gradient(rgba(255,255,255,.04) 1px, rgba(0,0,0,0) 1px);
+      background-size: 3px 3px;
+      opacity:.06;
+      mix-blend-mode:overlay;
     }
 
     /* ---------- SCREENS ---------- */
     .screen{position:absolute;inset:0;display:none;align-items:center;justify-content:center}
     .screen.active{display:flex}
+    .fadeIn{animation:fadeIn .18s ease-out}
+    @keyframes fadeIn{from{opacity:.0;transform:scale(.995)}to{opacity:1;transform:scale(1)}}
 
     /* ---------- COMMON UI ---------- */
     .panel{
-      width:min(520px,92vw);
+      width:min(560px,92vw);
       background:var(--panel);
       border:1px solid var(--border);
       border-radius:var(--radius);
@@ -51,19 +61,32 @@
       border:1px solid var(--border);
       background:rgba(255,255,255,.06);
       color:var(--t1);
-      letter-spacing:.10em; text-transform:uppercase; font-weight:800;
+      letter-spacing:.10em; text-transform:uppercase; font-weight:900;
       backdrop-filter: blur(10px);
       text-align:center;
+      transition:transform .08s ease, background .12s ease, border-color .12s ease;
     }
-    .btn.primary{background:rgba(69,255,117,.16); border-color:rgba(69,255,117,.22)}
-    .btn.secondary{background:rgba(47,169,255,.10); border-color:rgba(47,169,255,.20)}
-    .btn.danger{background:rgba(255,61,77,.12); border-color:rgba(255,61,77,.22)}
-    .btn:active{transform:translateY(1px)}
-    .hint{margin-top:10px;color:rgba(234,247,241,.5);font-size:12px}
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0px)}
+    .btn.primary{background:rgba(69,255,117,.16); border-color:rgba(69,255,117,.26)}
+    .btn.secondary{background:rgba(47,169,255,.10); border-color:rgba(47,169,255,.22)}
+    .btn.danger{background:rgba(255,61,77,.12); border-color:rgba(255,61,77,.26)}
+    .btn.big{padding:16px 18px;border-radius:16px;font-size:14px}
+    .hint{margin-top:10px;color:rgba(234,247,241,.52);font-size:12px}
+
+    .chip{
+      display:inline-flex;gap:10px;align-items:center;
+      border-radius:999px;
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.28);
+      backdrop-filter: blur(10px);
+    }
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
 
     /* ---------- BOOT ---------- */
-    .bootWrap{width:min(520px,92vw)}
-    .logo{letter-spacing:.14em;text-transform:uppercase;font-weight:900;margin:0 0 10px}
+    .bootWrap{width:min(560px,92vw)}
+    .logo{letter-spacing:.18em;text-transform:uppercase;font-weight:950;margin:0 0 10px}
     .bootText{color:var(--t2);margin:0 0 16px}
     .bar{height:10px;border-radius:999px;border:1px solid var(--border);overflow:hidden;background:rgba(255,255,255,.05)}
     .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--g),var(--c))}
@@ -86,7 +109,7 @@
     }
     .introTag{
       pointer-events:none;
-      max-width:min(560px,92vw);
+      max-width:min(620px,92vw);
       background:var(--panel);
       border:1px solid var(--border);
       border-radius:var(--radius);
@@ -94,35 +117,52 @@
       backdrop-filter: blur(10px);
       box-shadow:0 22px 90px rgba(0,0,0,.55);
     }
-    .tagTitle{margin:0 0 6px;letter-spacing:.12em;text-transform:uppercase;font-weight:900}
+    .tagTitle{margin:0 0 6px;letter-spacing:.14em;text-transform:uppercase;font-weight:950}
     .tagSub{margin:0;color:var(--t2);line-height:1.45}
     .btnRow{display:flex;gap:10px;pointer-events:auto}
+    .introShade{
+      position:absolute; inset:0;
+      background:radial-gradient(110% 80% at 50% 10%, rgba(69,255,117,.14), rgba(0,0,0,.76));
+      pointer-events:none;
+      mix-blend-mode:overlay;
+    }
 
     /* ---------- LOBBY ---------- */
     #lobby{align-items:stretch;justify-content:stretch}
     .lobbyBg{
       position:absolute; inset:0;
       background:
-        radial-gradient(80% 60% at 50% 10%, rgba(69,255,117,.18), rgba(0,0,0,.78)),
+        radial-gradient(100% 70% at 50% 10%, rgba(69,255,117,.18), rgba(0,0,0,.82)),
         url("assets/img/lobby_bg.jpg");
       background-position:center;
       background-size:cover;
       background-repeat:no-repeat;
-      filter: saturate(1.05) contrast(1.05);
+      filter:saturate(1.05) contrast(1.07);
+      transform:scale(1.02);
+      animation:bgFloat 7s ease-in-out infinite;
     }
-    .lobbyTop{position:absolute; top:16px; left:16px; right:16px; display:flex; justify-content:flex-start; z-index:5}
+    @keyframes bgFloat{0%{transform:scale(1.02) translateY(0)}50%{transform:scale(1.03) translateY(-6px)}100%{transform:scale(1.02) translateY(0)}}
+    .lobbyGlow{
+      position:absolute; inset:-40px;
+      background:radial-gradient(60% 40% at 35% 20%, rgba(47,169,255,.10), rgba(0,0,0,0));
+      filter:blur(10px);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    .lobbyTop{position:absolute; top:16px; left:16px; right:16px; display:flex; justify-content:space-between; gap:12px; z-index:5}
     .playerCard{
-      width:min(360px,92vw);
+      width:min(380px,92vw);
       background:var(--panel);
       border:1px solid var(--border);
-      border-radius:var(--radius);
+      border-radius:20px;
       padding:14px 14px 12px;
       backdrop-filter: blur(10px);
       box-shadow:0 22px 90px rgba(0,0,0,.55);
     }
-    .pcTitle{letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:rgba(234,247,241,.78);font-size:12px}
-    .pcId{font-weight:950;font-size:28px;letter-spacing:.08em;margin:4px 0 2px}
-    .pcMeta{color:var(--t2);font-size:13px}
+    .pcTitle{letter-spacing:.16em;text-transform:uppercase;font-weight:950;color:rgba(234,247,241,.78);font-size:12px}
+    .pcId{font-weight:950;font-size:30px;letter-spacing:.08em;margin:4px 0 2px}
+    .pcMeta{color:var(--t2);font-size:13px;display:flex;gap:8px;flex-wrap:wrap}
     .xpBar{height:10px;border-radius:999px;border:1px solid var(--border);overflow:hidden;background:rgba(255,255,255,.05);margin-top:10px}
     .xpFill{height:100%;background:linear-gradient(90deg,var(--g),var(--c));width:28%}
 
@@ -130,17 +170,30 @@
       position:absolute; inset:0;
       display:flex; flex-direction:column;
       align-items:center; justify-content:center;
-      gap:10px; z-index:5;
-      padding:20px;
+      gap:12px; z-index:5;
+      padding:24px;
     }
-    .btn.big{padding:16px 18px;border-radius:16px;font-size:14px}
-    .centerSub{color:var(--t2);letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+    .titleStack{
+      width:min(640px,92vw);
+      text-align:center;
+      padding:14px 16px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.28);
+      backdrop-filter: blur(10px);
+      box-shadow:0 22px 90px rgba(0,0,0,.55);
+    }
+    .bigTitle{margin:0;letter-spacing:.20em;text-transform:uppercase;font-weight:950}
+    .subTitle{margin:8px 0 0;color:rgba(234,247,241,.62);letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+
+    .ctaRow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+    .ctaRow .btn{min-width:220px}
 
     .tabbar{
       position:absolute; left:12px; right:12px; bottom:12px;
       background:var(--panel);
       border:1px solid var(--border);
-      border-radius:20px;
+      border-radius:22px;
       display:grid;
       grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
       gap:8px;
@@ -154,7 +207,7 @@
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       gap:6px;
       padding:10px 8px;
-      border-radius:16px;
+      border-radius:18px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
       user-select:none;
@@ -163,47 +216,33 @@
     .tab:hover{transform:translateY(-1px)}
     .tab:active{transform:translateY(0px)}
     .tab img{width:22px;height:22px;opacity:.95}
-    .tab span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;color:rgba(234,247,241,.82)}
-    .tabPlay{background:rgba(69,255,117,.14);border-color:rgba(69,255,117,.25)}
+    .tab span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:950;color:rgba(234,247,241,.82)}
+    .tabPlay{background:rgba(69,255,117,.16);border-color:rgba(69,255,117,.26)}
     .tab.active{background:rgba(47,169,255,.12);border-color:rgba(47,169,255,.25)}
 
-    /* ---------- LOBBY DRAWER (tab content) ---------- */
-    .drawer{
-      position:absolute;
-      left:12px; right:12px;
-      bottom:86px;
-      z-index:9;
-      display:none;
-    }
+    .drawer{position:absolute;left:12px;right:12px;bottom:90px;z-index:9;display:none}
     .drawer.active{display:block}
     .drawerPanel{
       background:var(--panel);
       border:1px solid var(--border);
-      border-radius:20px;
+      border-radius:22px;
       padding:14px;
       backdrop-filter: blur(10px);
       box-shadow:0 22px 90px rgba(0,0,0,.55);
     }
-    .drawerHead{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom:10px;
-    }
-    .drawerTitle{
-      letter-spacing:.12em;text-transform:uppercase;font-weight:900;
-      margin:0;
-    }
+    .drawerHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .drawerTitle{letter-spacing:.14em;text-transform:uppercase;font-weight:950;margin:0}
     .closeX{
       all:unset; cursor:pointer;
       width:36px;height:36px;border-radius:12px;
       display:grid;place-items:center;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
-      font-weight:900;
+      font-weight:950;
     }
-    .row{display:flex;gap:10px;flex-wrap:wrap}
     .field{
       width:100%;
-      border-radius:14px;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.05);
       padding:12px 12px;
@@ -214,12 +253,14 @@
       white-space:nowrap;
     }
     .mini{font-size:12px;color:rgba(234,247,241,.58);line-height:1.5;margin:8px 0 0}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row .btn{flex:1;min-width:180px}
 
-    /* ---------- RUN (game) ---------- */
+    /* ---------- RUN ---------- */
     #run{align-items:stretch;justify-content:stretch}
     .runBg{
       position:absolute; inset:0;
-      background:radial-gradient(120% 90% at 50% 0%, rgba(47,169,255,.10), rgba(0,0,0,.86));
+      background:radial-gradient(120% 90% at 50% 0%, rgba(47,169,255,.10), rgba(0,0,0,.88));
     }
     .canvasWrap{
       position:absolute; inset:0;
@@ -228,7 +269,7 @@
       z-index:2;
       touch-action:none;
     }
-    canvas{width:100%;height:100%;border-radius:24px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03)}
+    canvas{width:100%;height:100%;border-radius:26px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.02)}
     .runHUD{
       position:absolute; left:16px; right:16px; top:16px;
       z-index:5;
@@ -237,13 +278,13 @@
     .hudChip{
       background:var(--panel);
       border:1px solid var(--border);
-      border-radius:16px;
+      border-radius:18px;
       padding:10px 12px;
       backdrop-filter: blur(10px);
       display:flex; gap:12px; align-items:center;
-      min-width: 220px;
+      box-shadow:0 22px 90px rgba(0,0,0,.45);
     }
-    .hudLabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(234,247,241,.62);font-weight:900}
+    .hudLabel{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(234,247,241,.62);font-weight:950}
     .hudValue{font-size:18px;font-weight:950;letter-spacing:.04em}
     .panicWrap{width:min(360px,92vw)}
     .panicBar{
@@ -263,14 +304,15 @@
       padding:10px 12px;
       backdrop-filter: blur(10px);
       font-size:12px;
-      letter-spacing:.04em;
+      letter-spacing:.06em;
+      text-transform:uppercase;
     }
 
     /* ---------- RESULT ---------- */
     #result{align-items:stretch;justify-content:stretch}
     .resultBg{
       position:absolute; inset:0;
-      background:radial-gradient(120% 90% at 50% 0%, rgba(69,255,117,.10), rgba(0,0,0,.88));
+      background:radial-gradient(120% 90% at 50% 0%, rgba(69,255,117,.10), rgba(0,0,0,.90));
     }
     .resultWrap{
       position:absolute; inset:0;
@@ -278,7 +320,7 @@
       padding:16px; z-index:5;
     }
     .resultGrid{
-      width:min(720px,94vw);
+      width:min(760px,94vw);
       display:grid;
       gap:12px;
       grid-template-columns: 1fr;
@@ -289,23 +331,24 @@
       min-width: 220px;
       background:var(--panel);
       border:1px solid var(--border);
-      border-radius:18px;
+      border-radius:20px;
       padding:14px;
       backdrop-filter: blur(10px);
       box-shadow:0 22px 90px rgba(0,0,0,.55);
     }
-    .statName{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(234,247,241,.62);font-weight:900}
-    .statVal{font-size:28px;font-weight:950;letter-spacing:.04em;margin-top:4px}
-    .resultActions{display:flex;gap:10px;flex-wrap:wrap}
-    .resultActions .btn{flex:1;min-width:220px}
+    .statName{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(234,247,241,.62);font-weight:950}
+    .statVal{font-size:30px;font-weight:950;letter-spacing:.04em;margin-top:4px}
     .divider{height:1px;background:rgba(255,255,255,.10);margin:6px 0}
     .smallNote{font-size:12px;color:rgba(234,247,241,.58);line-height:1.5}
 
-    /* mobile safe areas */
+    .resultActions{display:flex;gap:10px;flex-wrap:wrap}
+    .resultActions .btn{flex:1;min-width:220px}
+
+    /* safe areas */
     @supports(padding:max(0px)){
       .introHUD{padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));}
       .tabbar{left:max(12px, env(safe-area-inset-left));right:max(12px, env(safe-area-inset-right));bottom:max(12px, env(safe-area-inset-bottom));}
-      .drawer{left:max(12px, env(safe-area-inset-left));right:max(12px, env(safe-area-inset-right));bottom:calc(max(86px, env(safe-area-inset-bottom) + 74px));}
+      .drawer{left:max(12px, env(safe-area-inset-left));right:max(12px, env(safe-area-inset-right));bottom:calc(max(90px, env(safe-area-inset-bottom) + 78px));}
       .lobbyTop{left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));top:max(16px, env(safe-area-inset-top));}
       .runHUD{left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));top:max(16px, env(safe-area-inset-top));}
       .runBottom{left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));bottom:max(16px, env(safe-area-inset-bottom));}
@@ -319,19 +362,20 @@
     <div class="screen active" id="boot">
       <div class="bootWrap">
         <h1 class="logo">OUTBREAK LINK</h1>
-        <p class="bootText">Initializing Outbreak Protocol…</p>
+        <p class="bootText">Booting containment protocol…</p>
         <div class="bar"><div class="fill" id="bootFill"></div></div>
-        <div class="tiny">v0.2 local build • prototype run loop</div>
+        <div class="tiny">v0.3 • arcade feel + share card</div>
       </div>
     </div>
 
     <!-- INTRO -->
     <div class="screen" id="intro">
       <video class="introVideo" id="introVideo" playsinline muted autoplay></video>
+      <div class="introShade"></div>
       <div class="introHUD">
         <div class="introTag">
-          <div class="tagTitle">This virus infects a link.</div>
-          <p class="tagSub">Get your Infection ID. Spread it. Climb the monthly ranking.</p>
+          <div class="tagTitle">THE VIRUS IS THE LINK.</div>
+          <p class="tagSub">Get an Infection ID. Spread it. Fight for the monthly crown.</p>
         </div>
         <div class="btnRow">
           <button class="btn" id="skipBtn">SKIP</button>
@@ -343,38 +387,56 @@
     <!-- LOGIN -->
     <div class="screen" id="login">
       <div class="panel">
-        <h2 style="letter-spacing:.12em;text-transform:uppercase;margin:0">Continue</h2>
-        <p class="muted">Sign in to save your Infection ID, chain, and season rank.</p>
+        <h2 style="letter-spacing:.14em;text-transform:uppercase;margin:0">Continue</h2>
+        <p class="muted">Prototype login. Progress is saved on this device for now.</p>
         <div class="col">
           <button class="btn secondary" id="googleBtn">Google (later)</button>
           <button class="btn secondary" id="tgBtn">Telegram (later)</button>
           <button class="btn primary" id="guestBtn">Guest</button>
         </div>
-        <div class="hint">Prototype login. Next step: real auth + backend.</div>
+        <div class="hint">Backend comes later. Now we build the “addiction loop”.</div>
       </div>
     </div>
 
     <!-- LOBBY -->
     <div class="screen" id="lobby">
       <div class="lobbyBg"></div>
+      <div class="lobbyGlow"></div>
 
       <div class="lobbyTop">
         <div class="playerCard">
           <div class="pcTitle">INFECTED</div>
-          <div class="pcId" id="uiId">#------</div>
+          <div class="pcId mono" id="uiId">#------</div>
           <div class="pcMeta">
-            <span id="uiCountry">--</span> • <span id="uiRank">Season Rank: #—</span>
+            <span class="chip mono" id="uiCountry">--</span>
+            <span class="chip" id="uiBy">Infected by: #------</span>
           </div>
           <div class="xpBar"><div class="xpFill" id="xpFill"></div></div>
+        </div>
+
+        <div class="chip" style="align-self:flex-start">
+          <span style="letter-spacing:.14em;text-transform:uppercase;font-weight:950;color:rgba(234,247,241,.65)">Season</span>
+          <span class="mono" id="uiSeason">Month #1</span>
         </div>
       </div>
 
       <div class="lobbyCenter">
-        <button class="btn primary big" id="playBtn">PLAY RUN</button>
-        <div class="centerSub">45 seconds. Contain the outbreak.</div>
+        <div class="titleStack">
+          <h1 class="bigTitle">CONTAINMENT RUN</h1>
+          <div class="subTitle">45 seconds • one finger • score + share card</div>
+        </div>
+
+        <div class="ctaRow">
+          <button class="btn primary big" id="playBtn">PLAY RUN</button>
+          <button class="btn secondary big" id="quickInfectBtn">COPY INFECT LINK</button>
+        </div>
+
+        <div class="chip" style="margin-top:6px">
+          <span style="letter-spacing:.14em;text-transform:uppercase;font-weight:950;color:rgba(234,247,241,.65)">Goal</span>
+          <span>Get a higher score → more shares → more infections.</span>
+        </div>
       </div>
 
-      <!-- tab content drawer -->
       <div class="drawer" id="drawer">
         <div class="drawerPanel">
           <div class="drawerHead">
@@ -385,7 +447,6 @@
         </div>
       </div>
 
-      <!-- tab bar -->
       <div class="tabbar">
         <button class="tab" id="tab_infect" data-tab="infect">
           <img src="assets/ui/icon_infect.png" alt="">
@@ -418,15 +479,15 @@
         <div class="hudChip">
           <div>
             <div class="hudLabel">TIME</div>
-            <div class="hudValue" id="hudTime">00:45</div>
+            <div class="hudValue mono" id="hudTime">00:45</div>
           </div>
           <div>
             <div class="hudLabel">SCORE</div>
-            <div class="hudValue" id="hudScore">0</div>
+            <div class="hudValue mono" id="hudScore">0</div>
           </div>
           <div>
             <div class="hudLabel">COMBO</div>
-            <div class="hudValue" id="hudCombo">0x</div>
+            <div class="hudValue mono" id="hudCombo">0x</div>
           </div>
         </div>
 
@@ -443,7 +504,7 @@
       </div>
 
       <div class="runBottom">
-        <div class="tip">Move your cursor/finger. Collect GREEN. Avoid RED. Keep combo.</div>
+        <div class="tip">Collect GREEN • dodge RED • keep combo • don’t max PANIC</div>
         <button class="btn danger" id="runQuit">QUIT</button>
       </div>
     </div>
@@ -456,23 +517,23 @@
           <div class="statRow">
             <div class="stat">
               <div class="statName">RUN SCORE</div>
-              <div class="statVal" id="resScore">0</div>
+              <div class="statVal mono" id="resScore">0</div>
             </div>
             <div class="stat">
               <div class="statName">BEST SCORE</div>
-              <div class="statVal" id="resBest">0</div>
+              <div class="statVal mono" id="resBest">0</div>
             </div>
           </div>
 
           <div class="stat">
-            <div class="statName">YOUR INFECTION LINK</div>
+            <div class="statName">SHARE CARD + LINK</div>
             <div class="divider"></div>
             <div class="field" id="resLink">—</div>
             <div class="resultActions" style="margin-top:10px">
               <button class="btn primary" id="resCopy">COPY LINK</button>
-              <button class="btn secondary" id="resShare">SHARE</button>
+              <button class="btn secondary" id="resDownload">DOWNLOAD CARD</button>
             </div>
-            <div class="smallNote">Infection counts and monthly ranking become real after backend.</div>
+            <div class="smallNote">The card is the hook: people repost → new players enter via your link.</div>
           </div>
 
           <div class="resultActions">
@@ -481,12 +542,15 @@
           </div>
         </div>
       </div>
+
+      <!-- hidden share canvas -->
+      <canvas id="shareCanvas" width="1080" height="1350" style="display:none"></canvas>
     </div>
 
   </div>
 
   <script>
-    // ------------------ ROUTER ------------------
+    // ---------- ROUTER ----------
     const screens = {
       boot:   document.getElementById('boot'),
       intro:  document.getElementById('intro'),
@@ -496,483 +560,542 @@
       result: document.getElementById('result'),
     };
     function show(name){
-      Object.values(screens).forEach(s=>s.classList.remove('active'));
-      screens[name].classList.add('active');
+      Object.values(screens).forEach(s=>{ s.classList.remove('active'); s.classList.remove('fadeIn'); });
+      screens[name].classList.add('active','fadeIn');
     }
 
-    // ------------------ STORAGE / ID ------------------
-    const LS_ID = 'ol_id';
-    const LS_BEST = 'ol_best';
-    const LS_INFECTED_BY = 'ol_infected_by';
-    const LS_CREATOR = 'ol_creator';
-
-    function parseParams(){
-      const u = new URL(window.location.href);
-      return {
-        ref: u.searchParams.get('ref'),
-        creator: u.searchParams.get('creator')
-      };
+    // ---------- SIMPLE SFX (no files) ----------
+    const audioCtx = (()=> {
+      try { return new (window.AudioContext||window.webkitAudioContext)(); } catch(e){ return null; }
+    })();
+    function beep(type='click'){
+      if(!audioCtx) return;
+      const t = audioCtx.currentTime;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type = 'sine';
+      const freq = type==='good'? 740 : type==='bad'? 150 : 420;
+      o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.12, t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+0.12);
+      o.start(t); o.stop(t+0.13);
+    }
+    function haptic(ms=20){
+      if (navigator.vibrate) navigator.vibrate(ms);
     }
 
+    // ---------- ID / REF ----------
+    const LS_ID='ol_id', LS_BEST='ol_best', LS_BY='ol_by', LS_CREATOR='ol_creator', LS_COUNTRY='ol_country';
     function pad6(n){ return String(n).padStart(6,'0'); }
-
+    function params(){
+      const u=new URL(window.location.href);
+      return { ref:u.searchParams.get('ref'), creator:u.searchParams.get('creator') };
+    }
+    function baseUrl(){
+      return window.location.href.split('#')[0].split('?')[0];
+    }
     function getOrCreateId(){
-      const p = parseParams();
-      if (p.creator === '1') localStorage.setItem(LS_CREATOR,'1');
-      const isCreator = localStorage.getItem(LS_CREATOR) === '1';
-      if (isCreator){
-        localStorage.setItem(LS_ID, '000001');
+      const p=params();
+      if (p.creator==='1') localStorage.setItem(LS_CREATOR,'1');
+      if (localStorage.getItem(LS_CREATOR)==='1'){
+        localStorage.setItem(LS_ID,'000001');
         return '000001';
       }
-
-      let id = localStorage.getItem(LS_ID);
-      if (!id){
-        // random 6 digits, not "secure" (backend later). good enough for prototype.
-        id = pad6(Math.floor(100000 + Math.random()*900000));
-        localStorage.setItem(LS_ID, id);
+      let id=localStorage.getItem(LS_ID);
+      if(!id){
+        id=pad6(Math.floor(100000 + Math.random()*900000));
+        localStorage.setItem(LS_ID,id);
       }
       return id;
     }
-
-    function getBaseUrl(){
-      return window.location.href.split('#')[0].split('?')[0];
-    }
-    function infectLink(myId){
-      return `${getBaseUrl()}?ref=${myId}`;
-    }
-
+    function infectLink(id){ return `${baseUrl()}?ref=${id}`; }
     function initRef(){
-      const p = parseParams();
+      const p=params();
       if (p.ref && /^\d{6}$/.test(p.ref)){
-        // don't set infected_by to self
-        const myId = getOrCreateId();
-        if (p.ref !== myId){
-          localStorage.setItem(LS_INFECTED_BY, p.ref);
-        }
+        const my=getOrCreateId();
+        if (p.ref !== my) localStorage.setItem(LS_BY, p.ref);
       }
     }
-
-    function guessCountry(){
-      // prototype only (backend later). keep stable per device
-      const key = 'ol_country';
-      let c = localStorage.getItem(key);
-      if (!c){
-        c = 'AT'; // default; backend will do real geo
-        localStorage.setItem(key,c);
-      }
+    function country(){
+      let c=localStorage.getItem(LS_COUNTRY);
+      if(!c){ c='AT'; localStorage.setItem(LS_COUNTRY,c); }
       return c;
     }
 
+    // ---------- UI UPDATE ----------
     function updateLobbyUI(){
-      const myId = getOrCreateId();
-      document.getElementById('uiId').textContent = `#${myId}`;
-      document.getElementById('uiCountry').textContent = guessCountry();
-      // fake XP fill based on last digit
-      const xp = (parseInt(myId[5],10) / 9) * 100;
+      const id=getOrCreateId();
+      const by=localStorage.getItem(LS_BY) || '------';
+      document.getElementById('uiId').textContent = `#${id}`;
+      document.getElementById('uiCountry').textContent = country();
+      document.getElementById('uiBy').textContent = `Infected by: #${by}`;
+      const xp=(parseInt(id[5],10)/9)*100;
       document.getElementById('xpFill').style.width = Math.max(18, Math.min(92, xp)) + '%';
+      document.getElementById('uiSeason').textContent = `Month #${new Date().getMonth()+1}`;
     }
 
-    // ------------------ BOOT ------------------
-    const fill = document.getElementById('bootFill');
-    let p = 0;
-    const bootTimer = setInterval(()=>{
-      p += 8;
-      fill.style.width = Math.min(p,100) + '%';
-      if(p >= 100){
-        clearInterval(bootTimer);
-        startIntro();
-      }
-    }, 60);
+    async function copyText(text){
+      try{ await navigator.clipboard.writeText(text); return true; }
+      catch(e){ return false; }
+    }
 
-    // ------------------ INTRO ------------------
-    const introVideo = document.getElementById('introVideo');
+    // ---------- BOOT ----------
+    const bootFill=document.getElementById('bootFill');
+    let bp=0;
+    const bt=setInterval(()=>{
+      bp+=8; bootFill.style.width = Math.min(bp,100)+'%';
+      if(bp>=100){ clearInterval(bt); startIntro(); }
+    }, 55);
+
+    // ---------- INTRO ----------
+    const introVideo=document.getElementById('introVideo');
     function startIntro(){
       initRef();
       updateLobbyUI();
       show('intro');
-      introVideo.src = 'assets/video/intro.mp4';
-      introVideo.addEventListener('ended', ()=> goLogin(), {once:true});
+      introVideo.src='assets/video/intro.mp4';
+      introVideo.addEventListener('ended', ()=>goLogin(), {once:true});
+      // iOS may block autoplay; buttons still work.
     }
-    function goLogin(){
-      try{ introVideo.pause(); }catch(e){}
-      show('login');
-    }
-    document.getElementById('skipBtn').onclick = goLogin;
-    document.getElementById('enterBtn').onclick = goLogin;
+    function goLogin(){ try{ introVideo.pause(); }catch(e){} show('login'); }
+    document.getElementById('skipBtn').onclick = ()=>{ beep('click'); goLogin(); };
+    document.getElementById('enterBtn').onclick= ()=>{ beep('click'); goLogin(); };
 
-    // ------------------ LOGIN ------------------
-    document.getElementById('googleBtn').onclick = ()=> alert('Google login later (backend step).');
-    document.getElementById('tgBtn').onclick     = ()=> alert('Telegram login later (backend step).');
-    document.getElementById('guestBtn').onclick  = ()=> { updateLobbyUI(); show('lobby'); };
+    // ---------- LOGIN ----------
+    document.getElementById('googleBtn').onclick = ()=> alert('Google login later (backend).');
+    document.getElementById('tgBtn').onclick     = ()=> alert('Telegram login later (backend).');
+    document.getElementById('guestBtn').onclick  = ()=>{ beep('click'); updateLobbyUI(); show('lobby'); };
 
-    // ------------------ LOBBY DRAWER / TABS ------------------
-    const drawer = document.getElementById('drawer');
-    const drawerTitle = document.getElementById('drawerTitle');
-    const drawerBody  = document.getElementById('drawerBody');
-    const drawerClose = document.getElementById('drawerClose');
-    const tabs = Array.from(document.querySelectorAll('.tab'));
+    // ---------- LOBBY DRAWER ----------
+    const drawer=document.getElementById('drawer');
+    const drawerTitle=document.getElementById('drawerTitle');
+    const drawerBody=document.getElementById('drawerBody');
+    const tabs=[...document.querySelectorAll('.tab')];
 
-    function setActiveTab(tabName){
-      tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab === tabName));
+    function setActiveTab(name){
+      tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
     }
     function openDrawer(title, html){
-      drawerTitle.textContent = title;
-      drawerBody.innerHTML = html;
+      drawerTitle.textContent=title;
+      drawerBody.innerHTML=html;
       drawer.classList.add('active');
     }
     function closeDrawer(){
       drawer.classList.remove('active');
       setActiveTab(null);
     }
-    drawerClose.onclick = closeDrawer;
-
-    async function copyText(text){
-      try{
-        await navigator.clipboard.writeText(text);
-        return true;
-      }catch(e){
-        return false;
-      }
-    }
+    document.getElementById('drawerClose').onclick=()=>{ beep('click'); closeDrawer(); };
 
     function tabInfect(){
-      const myId = getOrCreateId();
+      const id=getOrCreateId();
+      const link=infectLink(id);
       setActiveTab('infect');
       openDrawer('INFECT', `
-        <div class="mini">Your personal infection link (share it):</div>
-        <div class="field" id="linkField">${infectLink(myId)}</div>
+        <div class="mini">Your personal infection link:</div>
+        <div class="field mono" id="linkField">${link}</div>
         <div class="row" style="margin-top:10px">
           <button class="btn primary" id="copyLinkBtn">COPY LINK</button>
-          <button class="btn secondary" id="openTgBtn">OPEN TELEGRAM</button>
+          <button class="btn secondary" id="openTgBtn">OPEN TG</button>
         </div>
-        <div class="mini">
-          Prototype. Later: real infection count + verified season ranking.
-        </div>
+        <div class="mini">Tip: post the share-card image + link. It spreads faster than text.</div>
       `);
-
-      const copyBtn = document.getElementById('copyLinkBtn');
-      const openTgBtn = document.getElementById('openTgBtn');
-
-      copyBtn.onclick = async ()=>{
-        const ok = await copyText(infectLink(myId));
-        copyBtn.textContent = ok ? 'COPIED' : 'COPY MANUALLY';
-        setTimeout(()=>copyBtn.textContent='COPY LINK', 900);
+      document.getElementById('copyLinkBtn').onclick=async()=>{
+        beep('click');
+        const ok=await copyText(link);
+        if(ok){ haptic(15); beep('good'); }
       };
-      openTgBtn.onclick = ()=> alert('Later: open your TG channel / bot link here.');
+      document.getElementById('openTgBtn').onclick=()=>{
+        // put your handles here later; leaving as placeholders to avoid raw urls in chat
+        alert('Later: we will put your TG channel + bot links here.');
+      };
     }
-
     function tabWorld(){
       setActiveTab('world');
       openDrawer('WORLD', `
-        <div class="mini">World outbreak map + timeline (backend later).</div>
-        <div class="field">Timeline: #1 AT → #2 DE → #3 ...</div>
-        <div class="mini">Here we will show: infections/day, speed, first carrier per country.</div>
+        <div class="mini">World timeline becomes real after backend.</div>
+        <div class="field mono">AT → DE → … (prototype)</div>
+        <div class="mini">We’ll store country hops + speed + first carrier per country.</div>
       `);
     }
-
     function tabLineage(){
-      const by = localStorage.getItem('ol_infected_by') || '------';
+      const by=localStorage.getItem(LS_BY) || '------';
       setActiveTab('lineage');
       openDrawer('LINEAGE', `
-        <div class="mini">Your infection chain (prototype).</div>
-        <div class="field">Infected by: #${by}</div>
-        <div class="field" style="margin-top:10px">Path to CREATOR: #000001 → ...</div>
+        <div class="mini">Your chain (prototype):</div>
+        <div class="field mono">Infected by: #${by}</div>
+        <div class="field mono" style="margin-top:10px">Path to CREATOR: #000001 → …</div>
       `);
     }
-
     function tabTop(){
       setActiveTab('top');
       openDrawer('TOP', `
-        <div class="mini">Monthly season leaderboard (prototype).</div>
-        <div class="field">#1  INFECTED #000120  —  184 infections</div>
-        <div class="field" style="margin-top:8px">#2  INFECTED #000381  —  152 infections</div>
-        <div class="field" style="margin-top:8px">#3  INFECTED #000905  —  99 infections</div>
-        <div class="mini">Winners later: prize + video message in TG channel.</div>
+        <div class="mini">Monthly leaderboard is backend later.</div>
+        <div class="field mono">#1  INFECTED #000120 — 184 infections</div>
+        <div class="field mono" style="margin-top:8px">#2  INFECTED #000381 — 152 infections</div>
+        <div class="field mono" style="margin-top:8px">#3  INFECTED #000905 — 99 infections</div>
       `);
     }
+    document.getElementById('tab_infect').onclick=()=>{ beep('click'); tabInfect(); };
+    document.getElementById('tab_world').onclick =()=>{ beep('click'); tabWorld(); };
+    document.getElementById('tab_lineage').onclick=()=>{ beep('click'); tabLineage(); };
+    document.getElementById('tab_top').onclick   =()=>{ beep('click'); tabTop(); };
 
-    document.getElementById('tab_infect').onclick  = tabInfect;
-    document.getElementById('tab_world').onclick   = tabWorld;
-    document.getElementById('tab_lineage').onclick = tabLineage;
-    document.getElementById('tab_top').onclick     = tabTop;
+    // quick copy button
+    document.getElementById('quickInfectBtn').onclick = async ()=>{
+      const id=getOrCreateId();
+      const ok=await copyText(infectLink(id));
+      if(ok){ haptic(20); beep('good'); }
+      else { beep('click'); }
+    };
 
-    // ------------------ RUN GAME (Containment Run) ------------------
-    const runQuit = document.getElementById('runQuit');
-    const playBtn = document.getElementById('playBtn');
-    const tabPlay = document.getElementById('tab_play');
+    // ---------- RUN GAME ----------
+    const playBtn=document.getElementById('playBtn');
+    const tabPlay=document.getElementById('tab_play');
+    const runQuit=document.getElementById('runQuit');
+    const hudTime=document.getElementById('hudTime');
+    const hudScore=document.getElementById('hudScore');
+    const hudCombo=document.getElementById('hudCombo');
+    const panicFill=document.getElementById('panicFill');
 
-    const hudTime  = document.getElementById('hudTime');
-    const hudScore = document.getElementById('hudScore');
-    const hudCombo = document.getElementById('hudCombo');
-    const panicFill = document.getElementById('panicFill');
+    const wrap=document.getElementById('canvasWrap');
+    const canvas=document.getElementById('gameCanvas');
+    const ctx=canvas.getContext('2d');
 
-    const canvas = document.getElementById('gameCanvas');
-    const wrap = document.getElementById('canvasWrap');
-    const ctx = canvas.getContext('2d');
-
-    let running = false;
-    let raf = 0;
-    let last = 0;
-
-    // game state
-    let timeLeft = 45;
-    let score = 0;
-    let combo = 0;
-    let panic = 0; // 0..1
-    let pointer = {x: 0, y: 0};
-    let orbs = [];
-    let spawnT = 0;
+    let running=false, raf=0, last=0;
+    let timeLeft=45, score=0, combo=0, panic=0.15, spawnT=0;
+    let pointer={x:120,y:120, vx:0, vy:0};
+    let ents=[]; // {x,y,vx,vy,r,bad,life}
+    let sparks=[]; // particles
 
     function resizeCanvas(){
-      // match actual pixel size for crispness
-      const rect = wrap.getBoundingClientRect();
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      canvas.width  = Math.floor(rect.width * dpr);
-      canvas.height = Math.floor(rect.height * dpr);
-      ctx.setTransform(dpr,0,0,dpr,0,0); // draw in css pixels
+      const rect=wrap.getBoundingClientRect();
+      const dpr=Math.min(2, window.devicePixelRatio||1);
+      canvas.width=Math.floor(rect.width*dpr);
+      canvas.height=Math.floor(rect.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
     }
 
     function resetRun(){
-      timeLeft = 45;
-      score = 0;
-      combo = 0;
-      panic = 0.15;
-      orbs = [];
-      spawnT = 0;
-      hudScore.textContent = '0';
-      hudCombo.textContent = '0x';
-      panicFill.style.width = '0%';
+      timeLeft=45; score=0; combo=0; panic=0.18; spawnT=0;
+      ents=[]; sparks=[];
+      hudScore.textContent='0';
+      hudCombo.textContent='0x';
+      panicFill.style.width='0%';
       updateTimeUI();
     }
 
     function updateTimeUI(){
-      const t = Math.max(0, Math.ceil(timeLeft));
-      const mm = String(Math.floor(t/60)).padStart(2,'0');
-      const ss = String(t%60).padStart(2,'0');
-      hudTime.textContent = `${mm}:${ss}`;
+      const t=Math.max(0, Math.ceil(timeLeft));
+      const mm=String(Math.floor(t/60)).padStart(2,'0');
+      const ss=String(t%60).padStart(2,'0');
+      hudTime.textContent=`${mm}:${ss}`;
     }
 
-    function rand(a,b){ return a + Math.random()*(b-a); }
+    function rand(a,b){ return a+Math.random()*(b-a); }
 
-    function spawnOrb(){
-      // green or red
-      const isBad = Math.random() < 0.22 + (1 - timeLeft/45)*0.12; // slightly more red over time
-      const w = wrap.getBoundingClientRect().width;
-      const h = wrap.getBoundingClientRect().height;
-      const r = isBad ? rand(10,16) : rand(10,18);
-
-      const side = Math.floor(Math.random()*4);
+    function spawnEnt(){
+      const rect=wrap.getBoundingClientRect();
+      const w=rect.width, h=rect.height;
+      const bad = Math.random() < 0.25 + (1-timeLeft/45)*0.12; // more red late
+      const r = bad ? rand(10,16) : rand(11,18);
+      const side = (Math.random()*4)|0;
+      const speed = rand(85,135) + (1-timeLeft/45)*120;
       let x,y,vx,vy;
-      const speed = rand(70, 120) + (1 - timeLeft/45)*90;
 
-      if (side===0){ x = -r; y = rand(0,h); vx=speed; vy=rand(-40,40); }
-      if (side===1){ x = w+r; y = rand(0,h); vx=-speed; vy=rand(-40,40); }
-      if (side===2){ x = rand(0,w); y = -r; vx=rand(-40,40); vy=speed; }
-      if (side===3){ x = rand(0,w); y = h+r; vx=rand(-40,40); vy=-speed; }
+      if(side===0){ x=-r; y=rand(0,h); vx=speed; vy=rand(-55,55); }
+      if(side===1){ x=w+r; y=rand(0,h); vx=-speed; vy=rand(-55,55); }
+      if(side===2){ x=rand(0,w); y=-r; vx=rand(-55,55); vy=speed; }
+      if(side===3){ x=rand(0,w); y=h+r; vx=rand(-55,55); vy=-speed; }
 
-      orbs.push({x,y,vx,vy,r, bad:isBad, life: 4.2});
+      ents.push({x,y,vx,vy,r,bad,life:4.2});
+    }
+
+    function sparkBurst(x,y,color){
+      for(let i=0;i<16;i++){
+        const a=Math.random()*Math.PI*2;
+        const sp=rand(60,220);
+        sparks.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:rand(.18,.38),c:color});
+      }
     }
 
     function startRun(){
-      closeDrawer();
-      setActiveTab(null);
-      show('run');
-      resizeCanvas();
-      resetRun();
-      running = true;
-      last = performance.now();
-      raf = requestAnimationFrame(loop);
+      closeDrawer(); setActiveTab(null);
+      show('run'); resizeCanvas(); resetRun();
+      running=true; last=performance.now();
+      beep('click'); haptic(10);
+      raf=requestAnimationFrame(loop);
     }
 
     function endRun(){
-      running = false;
+      running=false;
       cancelAnimationFrame(raf);
 
-      // best score
-      const best = parseInt(localStorage.getItem(LS_BEST) || '0', 10);
-      const newBest = Math.max(best, score);
+      const best=parseInt(localStorage.getItem(LS_BEST)||'0',10);
+      const newBest=Math.max(best, score);
       localStorage.setItem(LS_BEST, String(newBest));
 
-      // result UI
-      const myId = getOrCreateId();
-      document.getElementById('resScore').textContent = String(score);
-      document.getElementById('resBest').textContent  = String(newBest);
-      document.getElementById('resLink').textContent  = infectLink(myId);
+      const id=getOrCreateId();
+      document.getElementById('resScore').textContent=String(score);
+      document.getElementById('resBest').textContent=String(newBest);
+      document.getElementById('resLink').textContent=infectLink(id);
 
+      generateShareCard({id, score, best:newBest, country:country()});
       show('result');
     }
 
     function loop(now){
-      const dt = Math.min(0.033, (now - last)/1000);
-      last = now;
+      const dt=Math.min(0.033, (now-last)/1000);
+      last=now;
 
       timeLeft -= dt;
       spawnT += dt;
 
-      // natural panic rise (forces action)
-      panic += dt * 0.010; // tune
-      panic = Math.min(1, panic);
+      // panic rises slowly -> forces skill
+      panic = Math.min(1, panic + dt*0.010);
 
-      // spawn rate increases
-      const targetInterval = 0.28 - (1 - timeLeft/45)*0.10; // 0.28 -> 0.18
-      while (spawnT >= targetInterval){
-        spawnT -= targetInterval;
-        spawnOrb();
+      // spawn faster over time
+      const interval = 0.30 - (1-timeLeft/45)*0.11; // 0.30 -> 0.19
+      while(spawnT >= interval){ spawnT -= interval; spawnEnt(); }
+
+      // move ents
+      const rect=wrap.getBoundingClientRect();
+      const w=rect.width, h=rect.height;
+
+      for(const e of ents){
+        e.x += e.vx*dt; e.y += e.vy*dt; e.life -= dt;
       }
+      ents = ents.filter(e=> e.life>0 && e.x>-90 && e.x<w+90 && e.y>-90 && e.y<h+90);
 
-      // update orbs
-      const w = wrap.getBoundingClientRect().width;
-      const h = wrap.getBoundingClientRect().height;
-      for (const o of orbs){
-        o.x += o.vx * dt;
-        o.y += o.vy * dt;
-        o.life -= dt;
+      // smooth pointer (feels like gamepad)
+      pointer.x += pointer.vx * dt;
+      pointer.y += pointer.vy * dt;
+
+      // sparks
+      for(const s of sparks){
+        s.x += s.vx*dt; s.y += s.vy*dt; s.life -= dt;
+        s.vx *= (1 - dt*8); s.vy *= (1 - dt*8);
       }
-      orbs = orbs.filter(o => o.life > 0 && o.x > -80 && o.x < w+80 && o.y > -80 && o.y < h+80);
+      sparks = sparks.filter(s=> s.life>0);
 
-      // collisions (simple)
-      for (let i=orbs.length-1;i>=0;i--){
-        const o = orbs[i];
-        const dx = o.x - pointer.x;
-        const dy = o.y - pointer.y;
-        const d2 = dx*dx + dy*dy;
-        const rr = (o.r + 16); // pointer radius
-        if (d2 <= rr*rr){
-          if (o.bad){
-            // hit red: panic up, combo reset
-            panic = Math.min(1, panic + 0.22);
+      // collisions
+      const pr=18;
+      for(let i=ents.length-1;i>=0;i--){
+        const e=ents[i];
+        const dx=e.x-pointer.x, dy=e.y-pointer.y;
+        const rr=e.r+pr;
+        if(dx*dx+dy*dy <= rr*rr){
+          if(e.bad){
+            panic = Math.min(1, panic + 0.24);
             combo = 0;
-          } else {
-            // collect green: score up, panic down, combo up
-            combo = Math.min(99, combo + 1);
-            const mult = 1 + Math.min(2.5, combo * 0.06);
-            score += Math.floor(10 * mult);
-            panic = Math.max(0, panic - 0.16);
+            beep('bad'); haptic(25);
+            sparkBurst(e.x,e.y,'rgba(255,61,77,1)');
+          }else{
+            combo = Math.min(99, combo+1);
+            const mult = 1 + Math.min(2.6, combo*0.06);
+            score += Math.floor(10*mult);
+            panic = Math.max(0, panic - 0.17);
+            beep('good'); haptic(10);
+            sparkBurst(e.x,e.y,'rgba(69,255,117,1)');
           }
-          orbs.splice(i,1);
+          ents.splice(i,1);
         }
       }
 
       // UI
-      hudScore.textContent = String(score);
-      hudCombo.textContent = `${combo}x`;
-      panicFill.style.width = `${Math.floor(panic*100)}%`;
+      hudScore.textContent=String(score);
+      hudCombo.textContent=`${combo}x`;
+      panicFill.style.width=`${Math.floor(panic*100)}%`;
       updateTimeUI();
 
-      // draw
-      render();
+      render(w,h);
 
-      if (timeLeft <= 0 || panic >= 1){
+      if(timeLeft<=0 || panic>=1){
         endRun();
         return;
       }
-      raf = requestAnimationFrame(loop);
+      raf=requestAnimationFrame(loop);
     }
 
-    function render(){
-      const rect = wrap.getBoundingClientRect();
-      const w = rect.width, h = rect.height;
-
+    function render(w,h){
       ctx.clearRect(0,0,w,h);
 
-      // soft vignette
-      const g = ctx.createRadialGradient(w*0.5, h*0.3, 80, w*0.5, h*0.5, Math.max(w,h)*0.7);
-      g.addColorStop(0, 'rgba(47,169,255,0.08)');
-      g.addColorStop(1, 'rgba(0,0,0,0.60)');
-      ctx.fillStyle = g;
-      ctx.fillRect(0,0,w,h);
+      // soft lighting
+      const g=ctx.createRadialGradient(w*.5,h*.25,80,w*.5,h*.5,Math.max(w,h)*.75);
+      g.addColorStop(0,'rgba(47,169,255,0.10)');
+      g.addColorStop(1,'rgba(0,0,0,0.72)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
 
-      // orbs
-      for (const o of orbs){
-        ctx.beginPath();
-        ctx.arc(o.x, o.y, o.r, 0, Math.PI*2);
-        ctx.closePath();
-
-        if (o.bad){
-          ctx.fillStyle = 'rgba(255,61,77,0.16)';
-          ctx.fill();
-          ctx.strokeStyle = 'rgba(255,61,77,0.50)';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        } else {
-          ctx.fillStyle = 'rgba(69,255,117,0.16)';
-          ctx.fill();
-          ctx.strokeStyle = 'rgba(69,255,117,0.60)';
-          ctx.lineWidth = 2;
-          ctx.stroke();
+      // ents
+      for(const e of ents){
+        ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.closePath();
+        if(e.bad){
+          ctx.fillStyle='rgba(255,61,77,0.14)'; ctx.fill();
+          ctx.strokeStyle='rgba(255,61,77,0.55)'; ctx.lineWidth=2; ctx.stroke();
+        }else{
+          ctx.fillStyle='rgba(69,255,117,0.14)'; ctx.fill();
+          ctx.strokeStyle='rgba(69,255,117,0.60)'; ctx.lineWidth=2; ctx.stroke();
         }
       }
 
-      // pointer
-      ctx.beginPath();
-      ctx.arc(pointer.x, pointer.y, 16, 0, Math.PI*2);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(234,247,241,0.10)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(234,247,241,0.35)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      // sparks
+      for(const s of sparks){
+        ctx.globalAlpha = Math.max(0, s.life*2.6);
+        ctx.fillStyle = s.c;
+        ctx.fillRect(s.x-1.5, s.y-1.5, 3, 3);
+        ctx.globalAlpha = 1;
+      }
 
-      // crosshair lines
-      ctx.strokeStyle = 'rgba(234,247,241,0.18)';
-      ctx.lineWidth = 1;
+      // player
+      ctx.beginPath(); ctx.arc(pointer.x,pointer.y,18,0,Math.PI*2); ctx.closePath();
+      ctx.fillStyle='rgba(234,247,241,0.10)'; ctx.fill();
+      ctx.strokeStyle='rgba(234,247,241,0.35)'; ctx.lineWidth=2; ctx.stroke();
+
+      ctx.strokeStyle='rgba(234,247,241,0.18)'; ctx.lineWidth=1;
       ctx.beginPath();
-      ctx.moveTo(pointer.x - 22, pointer.y);
-      ctx.lineTo(pointer.x + 22, pointer.y);
-      ctx.moveTo(pointer.x, pointer.y - 22);
-      ctx.lineTo(pointer.x, pointer.y + 22);
+      ctx.moveTo(pointer.x-24,pointer.y); ctx.lineTo(pointer.x+24,pointer.y);
+      ctx.moveTo(pointer.x,pointer.y-24); ctx.lineTo(pointer.x,pointer.y+24);
       ctx.stroke();
     }
 
-    function setPointerFromEvent(clientX, clientY){
-      const rect = wrap.getBoundingClientRect();
-      pointer.x = Math.max(0, Math.min(rect.width,  clientX - rect.left));
-      pointer.y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+    function setPointerTarget(cx,cy){
+      const rect=wrap.getBoundingClientRect();
+      const tx=Math.max(0, Math.min(rect.width,  cx-rect.left));
+      const ty=Math.max(0, Math.min(rect.height, cy-rect.top));
+
+      // velocity points toward target (smooth)
+      const dx=tx-pointer.x, dy=ty-pointer.y;
+      pointer.vx = dx*10; // springy feel
+      pointer.vy = dy*10;
     }
 
-    wrap.addEventListener('mousemove', (e)=> setPointerFromEvent(e.clientX, e.clientY));
-    wrap.addEventListener('touchstart', (e)=>{
-      e.preventDefault();
-      const t = e.touches[0];
-      setPointerFromEvent(t.clientX, t.clientY);
-    }, {passive:false});
-    wrap.addEventListener('touchmove', (e)=>{
-      e.preventDefault();
-      const t = e.touches[0];
-      setPointerFromEvent(t.clientX, t.clientY);
-    }, {passive:false});
+    wrap.addEventListener('mousemove', e=> setPointerTarget(e.clientX,e.clientY));
+    wrap.addEventListener('touchstart', e=>{ e.preventDefault(); const t=e.touches[0]; setPointerTarget(t.clientX,t.clientY); }, {passive:false});
+    wrap.addEventListener('touchmove', e=>{ e.preventDefault(); const t=e.touches[0]; setPointerTarget(t.clientX,t.clientY); }, {passive:false});
+    window.addEventListener('resize', ()=>{ if(screens.run.classList.contains('active')) resizeCanvas(); });
 
-    window.addEventListener('resize', ()=> { if (screens.run.classList.contains('active')) resizeCanvas(); });
+    runQuit.onclick=()=>{ beep('click'); running=false; cancelAnimationFrame(raf); show('lobby'); };
 
-    runQuit.onclick = ()=> { running=false; cancelAnimationFrame(raf); show('lobby'); };
+    playBtn.onclick=startRun;
+    tabPlay.onclick=startRun;
 
-    playBtn.onclick = startRun;
-    tabPlay.onclick = startRun;
-
-    // ------------------ RESULT ACTIONS ------------------
-    document.getElementById('resRetry').onclick = startRun;
-    document.getElementById('resBack').onclick  = ()=> show('lobby');
+    // ---------- RESULT ----------
+    document.getElementById('resRetry').onclick = ()=>{ beep('click'); startRun(); };
+    document.getElementById('resBack').onclick  = ()=>{ beep('click'); show('lobby'); };
 
     document.getElementById('resCopy').onclick = async ()=>{
-      const myId = getOrCreateId();
-      const ok = await copyText(infectLink(myId));
-      document.getElementById('resCopy').textContent = ok ? 'COPIED' : 'COPY MANUALLY';
-      setTimeout(()=>document.getElementById('resCopy').textContent='COPY LINK', 900);
+      const id=getOrCreateId();
+      const ok=await copyText(infectLink(id));
+      if(ok){ haptic(18); beep('good'); }
+      else { beep('click'); }
     };
 
-    document.getElementById('resShare').onclick = async ()=>{
-      const myId = getOrCreateId();
-      const link = infectLink(myId);
-      const text = `I got INFECTED #${myId}. This virus infects a link.\n${link}`;
-      if (navigator.share){
-        try{
-          await navigator.share({title:'Outbreak Link', text, url: link});
-        }catch(e){}
-      } else {
-        const ok = await copyText(text);
-        alert(ok ? 'Share text copied.' : 'Copy link manually from the field.');
-      }
+    document.getElementById('resDownload').onclick = ()=>{
+      beep('click');
+      downloadShareCard();
     };
+
+    // ---------- SHARE CARD ----------
+    const shareCanvas=document.getElementById('shareCanvas');
+    const sctx=shareCanvas.getContext('2d');
+    const templateImg=new Image();
+    templateImg.src='assets/img/sharecard_template.png';
+    let templateReady=false;
+    templateImg.onload=()=>{ templateReady=true; };
+
+    function generateShareCard(data){
+      const {id, score, best, country} = data;
+      const W=shareCanvas.width, H=shareCanvas.height;
+
+      // background
+      if(templateReady){
+        sctx.drawImage(templateImg, 0,0,W,H);
+      }else{
+        const g=sctx.createLinearGradient(0,0,W,H);
+        g.addColorStop(0,'#060A10');
+        g.addColorStop(1,'#04050A');
+        sctx.fillStyle=g; sctx.fillRect(0,0,W,H);
+      }
+
+      // overlay glow
+      const rg=sctx.createRadialGradient(W*0.45,H*0.18,50,W*0.50,H*0.25,700);
+      rg.addColorStop(0,'rgba(69,255,117,0.16)');
+      rg.addColorStop(1,'rgba(0,0,0,0)');
+      sctx.fillStyle=rg; sctx.fillRect(0,0,W,H);
+
+      // text
+      sctx.fillStyle='rgba(234,247,241,0.92)';
+      sctx.font='900 64px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      sctx.fillText('OUTBREAK LINK', 70, 130);
+
+      sctx.fillStyle='rgba(234,247,241,0.72)';
+      sctx.font='900 28px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+      sctx.fillText(`INFECTED #${id}  •  ${country}`, 70, 190);
+
+      sctx.fillStyle='rgba(69,255,117,0.92)';
+      sctx.font='950 140px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+      sctx.fillText(String(score), 70, 390);
+
+      sctx.fillStyle='rgba(234,247,241,0.72)';
+      sctx.font='900 28px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      sctx.fillText('RUN SCORE', 70, 440);
+
+      sctx.fillStyle='rgba(47,169,255,0.92)';
+      sctx.font='900 40px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+      sctx.fillText(`BEST: ${best}`, 70, 520);
+
+      sctx.fillStyle='rgba(234,247,241,0.60)';
+      sctx.font='900 26px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+      const link=infectLink(id);
+      wrapText(sctx, link, 70, 1180, 940, 32);
+
+      sctx.fillStyle='rgba(234,247,241,0.58)';
+      sctx.font='900 22px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      sctx.fillText('THE VIRUS IS THE LINK. SHARE IT.', 70, 1260);
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+      const words=text.split(' ');
+      let line='';
+      for(let n=0;n<words.length;n++){
+        const testLine=line+words[n]+' ';
+        const m=ctx.measureText(testLine).width;
+        if(m>maxWidth && n>0){
+          ctx.fillText(line, x, y);
+          line=words[n]+' ';
+          y+=lineHeight;
+        }else line=testLine;
+      }
+      ctx.fillText(line, x, y);
+    }
+
+    function downloadShareCard(){
+      const url=shareCanvas.toDataURL('image/png');
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`outbreak_${getOrCreateId()}_score.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    // ---------- start in login from intro ----------
+    // (already wired)
+
+    // ---------- tabs ----------
+    document.getElementById('tab_infect').onclick = ()=>{ beep('click'); tabInfect(); };
+    document.getElementById('tab_world').onclick  = ()=>{ beep('click'); tabWorld(); };
+    document.getElementById('tab_lineage').onclick= ()=>{ beep('click'); tabLineage(); };
+    document.getElementById('tab_top').onclick    = ()=>{ beep('click'); tabTop(); };
+
+    // also copy link from lobby cta
+    document.getElementById('quickInfectBtn').onclick = async ()=>{
+      const id=getOrCreateId();
+      const ok=await copyText(infectLink(id));
+      if(ok){ haptic(18); beep('good'); }
+    };
+
   </script>
 </body>
 </html>
