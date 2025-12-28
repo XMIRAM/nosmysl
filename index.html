@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B1010" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <title>VIRAL LINK — The Experiment</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- Landscape blocker -->
+  <div id="rotateOverlay" aria-hidden="true">
+    <div class="rotateCard">
+      <div class="skull">☣</div>
+      <div class="rotateTitle">Только вертикально</div>
+      <div class="rotateText">Поверни телефон обратно. Горизонталки тут нет вообще.</div>
+    </div>
+  </div>
+
+  <div class="bgGrain"></div>
+  <div class="scanlines"></div>
+
+  <main class="app" role="application">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">☣</div>
+        <div class="brandText">
+          <div class="brandName">VIRAL LINK</div>
+          <div class="brandSub">Experimental Infection Chain</div>
+        </div>
+      </div>
+
+      <button id="btnSound" class="iconBtn" type="button" aria-label="Sound">
+        <span class="icon">🔊</span>
+      </button>
+    </header>
+
+    <!-- Screen: Home -->
+    <section id="screenHome" class="screen active">
+      <div class="hero">
+        <div class="badge glitch" data-text="VIRUS: VIRTUAL">VIRUS: VIRTUAL</div>
+        <h1 class="title">
+          Ты внутри эксперимента.
+          <span class="titleAccent">Стань частью цепочки.</span>
+        </h1>
+        <p class="subtitle">
+          Это не реальный вирус — это игра. Каждая “зараза” — это ссылка.
+          Чем больше людей — тем длиннее цепочка.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <div class="label">Твой статус</div>
+          <div id="statusText" class="value">Не активирован</div>
+        </div>
+        <div class="row">
+          <div class="label">Твой кейс</div>
+          <div id="caseText" class="value mono">—</div>
+        </div>
+        <div class="row">
+          <div class="label">Заражен от</div>
+          <div id="fromText" class="value mono">—</div>
+        </div>
+        <div class="row">
+          <div class="label">Длина цепочки</div>
+          <div id="chainLenText" class="value mono">—</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="btnJoin" class="btn primary" type="button">Получить Infection ID</button>
+        <button id="btnPlay" class="btn" type="button">Играть: набрать Viral Load</button>
+        <button id="btnTrace" class="btn ghost" type="button">Посмотреть цепочку</button>
+      </div>
+
+      <footer class="foot">
+        <div class="tiny">Tip: после игры ты сможешь “заразить” друга ссылкой.</div>
+      </footer>
+    </section>
+
+    <!-- Screen: Game -->
+    <section id="screenGame" class="screen">
+      <div class="gameHeader">
+        <button id="btnBackFromGame" class="btn mini ghost" type="button">← Назад</button>
+        <div class="gameTitle">VIRAL LOAD</div>
+        <div class="gameTimer mono" id="timerText">30.0</div>
+      </div>
+
+      <div class="gameCard">
+        <div class="meterWrap" aria-label="Viral Load meter">
+          <div class="meter">
+            <div id="meterFill" class="meterFill"></div>
+          </div>
+          <div class="meterText">
+            <div class="label">Набери 100%</div>
+            <div id="meterPct" class="value mono">0%</div>
+          </div>
+        </div>
+
+        <div id="tapZone" class="tapZone" role="button" tabindex="0" aria-label="Tap to increase viral load">
+          <div class="tapHint">
+            <div class="tapTitle">Тапай быстро</div>
+            <div class="tapSub">Нагрузка растёт от тапов и падает со временем</div>
+          </div>
+          <div class="tapPulse"></div>
+        </div>
+
+        <div class="gameActions">
+          <button id="btnShare" class="btn primary" type="button" disabled>Заразить (поделиться)</button>
+          <button id="btnCopy" class="btn" type="button">Скопировать ссылку</button>
+        </div>
+
+        <div class="tiny dim">Если Share не работает — копируй ссылку и кидай куда угодно.</div>
+      </div>
+    </section>
+
+    <!-- Screen: Trace -->
+    <section id="screenTrace" class="screen">
+      <div class="traceHeader">
+        <button id="btnBackFromTrace" class="btn mini ghost" type="button">← Назад</button>
+        <div class="traceTitle">TRACE CHAIN</div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <div class="label">Твой Infection ID</div>
+          <div id="myIdText" class="value mono">—</div>
+        </div>
+        <div class="row">
+          <div class="label">Твой номер кейса</div>
+          <div id="myCaseNumText" class="value mono">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Цепочка (от нуля до тебя)</div>
+        <div id="chainList" class="chainList"></div>
+      </div>
+
+      <div class="actions">
+        <button id="btnCopyTrace" class="btn" type="button">Скопировать цепочку</button>
+        <button id="btnReset" class="btn danger" type="button">Сбросить прогресс</button>
+      </div>
+
+      <footer class="foot">
+        <div class="tiny dim">Это фронтенд без сервера — цепочка живёт внутри ссылки и у тебя в устройстве.</div>
+      </footer>
+    </section>
+
+    <!-- Toast -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <script defer src="app.js"></script>
+</body>
+</html>
