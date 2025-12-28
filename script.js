@@ -1,11 +1,11 @@
-// Вставь свой firebaseConfig здесь (из консоли Firebase)
 const firebaseConfig = {
-  // apiKey: "твой_apiKey",
-  // authDomain: "твой_project.firebaseapp.com",
-  // projectId: "твой_projectId",
-  // storageBucket: "твой_project.appspot.com",
-  // messagingSenderId: "твой_senderId",
-  // appId: "твой_appId"
+  apiKey: "AIzaSyDUk8d4x_7VaHLJyFko27lTEOZZ46B3zbo",
+  authDomain: "zombieglobalvs.firebaseapp.com",
+  projectId: "zombieglobalvs",
+  storageBucket: "zombieglobalvs.firebasestorage.app",
+  messagingSenderId: "1038312557504",
+  appId: "1:1038312557504:web:67f4bef520987361d59625",
+  measurementId: "G-6YX9YQ7PS2"
 };
 
 // Импорты для модульного Firebase
