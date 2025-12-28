@@ -3,223 +3,284 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0B1311" />
+  <meta name="theme-color" content="#07100D" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>VIRAL LINK — Arcade</title>
+
+  <title>VIRAL LINK — ZOMBIE DEFENSE</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-  <!-- Portrait only -->
+  <!-- portrait only -->
   <div id="rotateOverlay" aria-hidden="true">
     <div class="rotateCard">
       <div class="rotateIcon">↻</div>
       <div class="rotateTitle">Только вертикально</div>
-      <div class="rotateText">Поверни телефон обратно. Горизонталки нет.</div>
+      <div class="rotateText">Поверни телефон обратно — горизонталки нет.</div>
     </div>
   </div>
 
-  <div class="bg">
-    <div class="bgGlow g1"></div>
-    <div class="bgGlow g2"></div>
-    <div class="bgGlow g3"></div>
-    <div class="grain"></div>
-    <div class="scan"></div>
+  <!-- VIDEO BACKGROUND (muted loop) -->
+  <div class="videoBg" aria-hidden="true">
+    <video id="bgVideo" class="videoBg__v" playsinline muted loop preload="auto">
+      <source src="assets/bg.mp4" type="video/mp4" />
+    </video>
+    <div class="videoBg__shade"></div>
+    <div class="videoBg__grain"></div>
+    <div class="videoBg__scan"></div>
   </div>
 
   <main class="app" role="application">
     <canvas id="cv"></canvas>
 
-    <!-- HUD -->
+    <!-- HUD (in-game) -->
     <div class="hud">
       <div class="hudLeft">
-        <div class="pill">
-          <span class="pillDot"></span>
-          <span id="hudMode">MENU</span>
+        <div class="hudPill">
+          <span class="hudDot"></span>
+          <span id="hudState">MENU</span>
         </div>
-        <div class="hudMini">
-          <div class="k">CASE</div>
-          <div id="hudCase" class="v mono">—</div>
+
+        <div class="hudBox">
+          <div class="k">HP</div>
+          <div id="hudHp" class="v mono">♥♥♥</div>
+        </div>
+
+        <div class="hudBox">
+          <div class="k">WAVE</div>
+          <div id="hudWave" class="v mono">1</div>
         </div>
       </div>
 
       <div class="hudCenter">
-        <div class="hudTitle">VIRAL LINK</div>
+        <div class="hudTitle">ZOMBIE DEFENSE</div>
         <div id="hudRank" class="hudRank">Rookie</div>
       </div>
 
       <div class="hudRight">
-        <div class="hudMini">
+        <div class="hudBox">
           <div class="k">TIME</div>
-          <div id="hudTime" class="v mono">45.0</div>
+          <div id="hudTime" class="v mono">60.0</div>
         </div>
-        <div class="hudMini">
+        <div class="hudBox">
           <div class="k">SCORE</div>
           <div id="hudScore" class="v mono">0</div>
         </div>
       </div>
     </div>
 
-    <!-- Load -->
-    <div class="load">
-      <div class="loadTop">
-        <div class="loadLabel">VIRAL LOAD</div>
-        <div id="loadPct" class="mono">0%</div>
-      </div>
-      <div class="bar">
-        <div id="barFill" class="barFill"></div>
-        <div class="barShine"></div>
-      </div>
+    <!-- Bottom “PC-game style” action buttons -->
+    <div class="actionBar">
+      <button id="btnBomb" class="gbtn gbtn--purple" type="button">
+        <span class="gbtn__title">BOMB</span>
+        <span id="bombCd" class="gbtn__sub mono">READY</span>
+      </button>
+
+      <button id="btnFire" class="gbtn gbtn--green" type="button">
+        <span class="gbtn__title">FIRE</span>
+        <span class="gbtn__sub mono">HOLD</span>
+      </button>
+
+      <button id="btnDash" class="gbtn gbtn--cyan" type="button">
+        <span class="gbtn__title">DASH</span>
+        <span id="dashCd" class="gbtn__sub mono">READY</span>
+      </button>
     </div>
 
-    <!-- MENU OVERLAY -->
+    <!-- INTRO overlay (shows immediately) -->
+    <section id="intro" class="overlay overlay--intro show" aria-label="Intro">
+      <div class="introCard">
+        <video id="introVideo" class="introVideo" playsinline preload="auto" poster="assets/intro.jpg">
+          <source src="assets/intro.mp4" type="video/mp4" />
+        </video>
+
+        <div class="introUi">
+          <div class="introBadge">VIRAL LINK</div>
+          <div class="introTitle">ZOMBIE DEFENSE</div>
+          <div class="introDesc">
+            Интро стартует сразу. Чтобы включить звук на телефоне — нужен первый тап.
+          </div>
+
+          <div class="introBtns">
+            <button id="btnStartSound" class="gbtn gbtn--green gbtn--big" type="button">
+              <span class="gbtn__title">TAP TO START</span>
+              <span class="gbtn__sub mono">SOUND ON</span>
+            </button>
+            <button id="btnSkipIntro" class="gbtn gbtn--ghost gbtn--big" type="button">
+              <span class="gbtn__title">SKIP</span>
+              <span class="gbtn__sub mono">MENU</span>
+            </button>
+          </div>
+
+          <div class="introTiny">Совет: лучше короткое интро 4–8 сек, mp4 H.264.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MENU overlay -->
     <section id="menu" class="overlay show" aria-label="Menu">
-      <div class="card">
-        <div class="rowTop">
+      <div class="panel">
+        <div class="panelTop">
           <div class="logo">☣</div>
-          <div class="rowTopText">
+          <div class="panelTopText">
             <div class="brand">VIRAL LINK</div>
-            <div class="sub">Mobile arcade · Virtual infection experiment</div>
+            <div class="sub">Mobile 2D arcade · Zombie waves · Neon HUD</div>
           </div>
           <button id="btnSound" class="chip" type="button">SOUND: ON</button>
         </div>
 
-        <!-- Intro video (centered, 16:9) -->
-        <div id="introWrap" class="introWrap">
-          <div class="introFrame">
-            <video id="introVideo" class="introVideo" playsinline muted loop preload="metadata"
-              poster="assets/intro-poster.jpg">
-              <source src="assets/intro.mp4" type="video/mp4" />
-            </video>
-            <div class="introOverlay">
-              <div class="introBadge">INTRO</div>
-              <button id="btnIntro" class="introBtn" type="button">PLAY</button>
-              <div class="introHint">Видео 16:9 по центру (как YouTube). Можно заменить файлом.</div>
-            </div>
-          </div>
-        </div>
-
-        <h1 class="title">Собирай сыворотку. Включай Fever. Ломай рекорды.</h1>
-        <p class="desc">
-          Управление: <b>двигай пальцем</b> вирус-ядро. Лови <span class="good">VIAL</span>, избегай <span class="bad">ANTIDOTE</span>.
-          Набери <b>100% LOAD</b> — откроется <b>Share</b> (ссылка несёт лидерборд цепочки).
-        </p>
-
-        <div class="grid2">
-          <div class="infoBox">
-            <div class="k">Твой ID</div>
+        <div class="grid">
+          <div class="info">
+            <div class="k">INFECTION ID</div>
             <div id="myId" class="v mono">—</div>
           </div>
-          <div class="infoBox">
-            <div class="k">Заражен от</div>
-            <div id="fromId" class="v mono">PATIENT ZERO</div>
+          <div class="info">
+            <div class="k">RANK</div>
+            <div id="myRank" class="v mono">Rookie</div>
           </div>
-          <div class="infoBox">
-            <div class="k">Цепочка</div>
-            <div id="chainLen" class="v mono">—</div>
+          <div class="info">
+            <div class="k">BEST</div>
+            <div id="best" class="v mono">0</div>
           </div>
-          <div class="infoBox">
-            <div class="k">Best</div>
-            <div id="bestScore" class="v mono">0</div>
+          <div class="info">
+            <div class="k">CHAIN</div>
+            <div id="chain" class="v mono">0</div>
           </div>
         </div>
 
-        <div class="btnRow">
-          <button id="btnJoin" class="btn ghost" type="button">GET INFECTION ID</button>
-          <button id="btnPlay" class="btn primary" type="button">PLAY</button>
+        <div class="panelBtns">
+          <button id="btnJoin" class="gbtn gbtn--ghost" type="button">
+            <span class="gbtn__title">GET ID</span>
+            <span class="gbtn__sub mono">CASE</span>
+          </button>
+
+          <button id="btnPlay" class="gbtn gbtn--green" type="button">
+            <span class="gbtn__title">PLAY</span>
+            <span class="gbtn__sub mono">WAVES</span>
+          </button>
         </div>
 
-        <div class="btnRow">
-          <button id="btnLeaders" class="btn" type="button">LEADERBOARD</button>
-          <button id="btnHow" class="btn" type="button">HOW TO PLAY</button>
+        <div class="panelBtns">
+          <button id="btnHow" class="gbtn gbtn--cyan" type="button">
+            <span class="gbtn__title">HOW</span>
+            <span class="gbtn__sub mono">CONTROL</span>
+          </button>
+
+          <button id="btnLeaders" class="gbtn gbtn--purple" type="button">
+            <span class="gbtn__title">LEADERS</span>
+            <span class="gbtn__sub mono">TOP</span>
+          </button>
         </div>
 
-        <div class="tiny dim">
-          Без сервера: топ игроков живёт в ссылке. Чем дальше шарят — тем сильнее лидерборд.
+        <div class="panelTiny">
+          Важно: “глобальный” топ без сервера невозможен. Тут: локальный топ + “цепочный топ” (в ссылке).
         </div>
       </div>
     </section>
 
-    <!-- HOW -->
+    <!-- HOW overlay -->
     <section id="how" class="overlay" aria-label="How">
-      <div class="card">
+      <div class="panel">
         <div class="big">HOW TO PLAY</div>
-        <div class="desc">
-          1) Двигай ядро пальцем (оно липнет к пальцу с физикой).<br/>
-          2) Лови <span class="good">зелёные VIAL</span> → +LOAD +SCORE +combo.<br/>
-          3) Уклоняйся от <span class="bad">красных ANTIDOTE</span> → −LOAD, сброс комбо, шок/вибро.<br/>
-          4) При 100% включается <b>FEVER</b>: x2 score, визуальный ад, частиц в 10 раз больше.<br/>
-          5) После победы жми <b>SHARE</b> — ссылка несёт твой best и строит топ цепочки.
+        <div class="text">
+          • Веди пальцем по экрану — прицел/направление. <br/>
+          • Держи <b>FIRE</b> — авто-стрельба. <br/>
+          • <b>BOMB</b> — взрыв вокруг игрока (кд). <br/>
+          • <b>DASH</b> — рывок (кд), чтобы уйти от зомби. <br/>
+          • Волны усиливаются. Делай комбо — растёт множитель очков.
         </div>
-        <div class="btnRow">
-          <button id="btnHowBack" class="btn primary" type="button">OK</button>
+        <div class="panelBtns">
+          <button id="btnHowBack" class="gbtn gbtn--green" type="button">
+            <span class="gbtn__title">OK</span>
+            <span class="gbtn__sub mono">BACK</span>
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- LEADERBOARD -->
-    <section id="leaders" class="overlay" aria-label="Leaderboard">
-      <div class="card">
-        <div class="rowTop">
+    <!-- LEADERS overlay -->
+    <section id="leaders" class="overlay" aria-label="Leaders">
+      <div class="panel">
+        <div class="panelTop">
           <div class="logo">🏆</div>
-          <div class="rowTopText">
-            <div class="brand">CHAIN LEADERBOARD</div>
-            <div class="sub">Топ игроков в этой вирусной цепочке</div>
+          <div class="panelTopText">
+            <div class="brand">LEADERBOARD</div>
+            <div class="sub">Local TOP + Chain TOP</div>
           </div>
           <button id="btnLeadersBack" class="chip" type="button">CLOSE</button>
         </div>
 
         <div class="tabs">
-          <button id="tabChain" class="tab on" type="button">CHAIN TOP</button>
-          <button id="tabLocal" class="tab" type="button">LOCAL</button>
+          <button id="tabLocal" class="tab on" type="button">LOCAL</button>
+          <button id="tabChain" class="tab" type="button">CHAIN</button>
         </div>
 
-        <div id="listChain" class="list"></div>
-        <div id="listLocal" class="list hidden"></div>
+        <div id="listLocal" class="list"></div>
+        <div id="listChain" class="list hidden"></div>
 
-        <div class="btnRow">
-          <button id="btnCopyBoard" class="btn" type="button">COPY BOARD</button>
-          <button id="btnReset" class="btn danger" type="button">RESET</button>
+        <div class="panelBtns">
+          <button id="btnCopyBoard" class="gbtn gbtn--ghost" type="button">
+            <span class="gbtn__title">COPY</span>
+            <span class="gbtn__sub mono">BOARD</span>
+          </button>
+          <button id="btnReset" class="gbtn gbtn--danger" type="button">
+            <span class="gbtn__title">RESET</span>
+            <span class="gbtn__sub mono">LOCAL</span>
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- RESULT -->
-    <section id="result" class="overlay" aria-label="Result">
-      <div class="card">
-        <div id="resultTitle" class="big">UNLOCKED ☣</div>
-        <div id="resultDesc" class="desc">Ты набрал 100%. Теперь можешь заразить ссылкой.</div>
+    <!-- GAME OVER overlay -->
+    <section id="over" class="overlay" aria-label="Game Over">
+      <div class="panel">
+        <div id="overTitle" class="big">GAME OVER</div>
+        <div id="overText" class="text">Твой результат:</div>
 
-        <div class="grid2">
-          <div class="infoBox">
+        <div class="grid">
+          <div class="info">
             <div class="k">SCORE</div>
-            <div id="resScore" class="v mono">0</div>
+            <div id="overScore" class="v mono">0</div>
           </div>
-          <div class="infoBox">
-            <div class="k">RANK</div>
-            <div id="resRank" class="v mono">Rookie</div>
-          </div>
-          <div class="infoBox">
+          <div class="info">
             <div class="k">BEST</div>
-            <div id="resBest" class="v mono">0</div>
+            <div id="overBest" class="v mono">0</div>
           </div>
-          <div class="infoBox">
-            <div class="k">LOAD</div>
-            <div id="resLoad" class="v mono">0%</div>
+          <div class="info">
+            <div class="k">RANK</div>
+            <div id="overRank" class="v mono">Rookie</div>
+          </div>
+          <div class="info">
+            <div class="k">KILLS</div>
+            <div id="overKills" class="v mono">0</div>
           </div>
         </div>
 
-        <div class="btnRow" id="shareRow">
-          <button id="btnShare" class="btn primary" type="button">SHARE</button>
-          <button id="btnCopy" class="btn" type="button">COPY LINK</button>
+        <div class="panelBtns">
+          <button id="btnShare" class="gbtn gbtn--green" type="button">
+            <span class="gbtn__title">SHARE</span>
+            <span class="gbtn__sub mono">LINK</span>
+          </button>
+          <button id="btnCopyLink" class="gbtn gbtn--ghost" type="button">
+            <span class="gbtn__title">COPY</span>
+            <span class="gbtn__sub mono">LINK</span>
+          </button>
         </div>
 
-        <div class="btnRow">
-          <button id="btnAgain" class="btn ghost" type="button">PLAY AGAIN</button>
-          <button id="btnMenu" class="btn" type="button">MENU</button>
+        <div class="panelBtns">
+          <button id="btnAgain" class="gbtn gbtn--cyan" type="button">
+            <span class="gbtn__title">AGAIN</span>
+            <span class="gbtn__sub mono">PLAY</span>
+          </button>
+          <button id="btnMenu" class="gbtn gbtn--purple" type="button">
+            <span class="gbtn__title">MENU</span>
+            <span class="gbtn__sub mono">HOME</span>
+          </button>
         </div>
+
+        <div class="panelTiny">Share создаёт ссылку с твоим best и “chain-top” внутри URL (без сервера).</div>
       </div>
     </section>
 
