@@ -5,15 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virus Game</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
 </head>
 <body>
     <div id="intro" class="intro-container">
-        <video autoplay muted playsinline>
+        <!-- Видео, если загружено; иначе заглушка -->
+        <video autoplay muted playsinline id="intro-video">
             <source src="intro.mp4" type="video/mp4">
         </video>
+        <p id="intro-placeholder" style="display: none;">Welcome to Virus Game! Click to enter.</p>
         <button onclick="startGame()">Enter the Virus</button>
     </div>
     <div id="hub" class="hub-container" style="display: none;">
@@ -27,6 +26,6 @@
         <div id="map" style="height: 300px;"></div>
         <a href="https://t.me/your_channel" target="_blank">Join Telegram</a>
     </div>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
