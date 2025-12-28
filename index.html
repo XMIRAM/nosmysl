@@ -8,10 +8,7 @@
 </head>
 <body>
     <div id="intro" class="intro-container">
-        <video autoplay muted playsinline id="intro-video">
-            <source src="intro.mp4" type="video/mp4">
-        </video>
-        <p id="intro-placeholder" style="display: none;">Welcome to Virus Game! Click to enter.</p>
+        <p>Welcome to Virus Game! Click to enter.</p>
         <button onclick="startGame()">Enter the Virus</button>
     </div>
     <div id="hub" class="hub-container" style="display: none;">
@@ -21,10 +18,10 @@
         <button onclick="copyLink()">Copy Link</button>
         <button onclick="shareLink()">Share</button>
         <div id="mini-game"></div>
-        <div id="leaderboard"></div>
-        <div id="map" style="height: 300px;"></div>
+        <div id="leaderboard"><h2>Top Infectors</h2><p>(Заглушка - топы позже)</p></div>
+        <div id="map" style="height: 300px;">(Карта позже)</div>
         <a href="https://t.me/your_channel" target="_blank">Join Telegram</a>
     </div>
-    <script type="module" src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
