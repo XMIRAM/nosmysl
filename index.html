@@ -2,26 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virus Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Virus Game - Global Meme Infection Experiment</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Open Graph for social sharing -->
+    <meta property="og:title" content="Virus Game">
+    <meta property="og:description" content="Spread the virus and climb the global leaderboard!">
+    <meta property="og:image" content="https://yourdomain.com/og-image.jpg">
+    <meta property="og:url" content="https://yourdomain.com">
 </head>
 <body>
     <div id="intro" class="intro-container">
-        <p>Welcome to Virus Game! Click to enter.</p>
-        <button onclick="startGame()">Enter the Virus</button>
+        <div class="intro-content">
+            <video autoplay muted playsinline loop id="intro-video">
+                <source src="intro.mp4" type="video/mp4">
+            </video>
+            <p id="intro-placeholder" class="hidden">Welcome to the Virus Lab. Click to Unleash the Experiment.</p>
+            <button id="enter-button" class="action-button">Enter the Virus</button>
+        </div>
     </div>
-    <div id="hub" class="hub-container" style="display: none;">
-        <h1>Your Infection ID: <span id="infection-id"></span></h1>
-        <p>Infected by: <span id="infected-by"></span></p>
-        <input id="virus-link" type="text" readonly>
-        <button onclick="copyLink()">Copy Link</button>
-        <button onclick="shareLink()">Share</button>
-        <div id="mini-game"></div>
-        <div id="leaderboard"><h2>Top Infectors</h2><p>(Заглушка - топы позже)</p></div>
-        <div id="map" style="height: 300px;">(Карта позже)</div>
-        <a href="https://t.me/your_channel" target="_blank">Join Telegram</a>
+    <div id="hub" class="hub-container hidden">
+        <header class="hub-header">
+            <h1>Virus Hub</h1>
+        </header>
+        <section class="player-info">
+            <p>Your Infection ID: <span id="infection-id" aria-live="polite"></span></p>
+            <p>Infected by: <span id="infected-by" aria-live="polite"></span></p>
+            <input id="virus-link" type="text" readonly aria-label="Your personal virus link">
+        </section>
+        <section class="actions">
+            <button id="copy-button" class="action-button">Copy Link</button>
+            <button id="share-button" class="action-button">Share</button>
+        </section>
+        <section id="mini-game" class="mini-game-section"></section>
+        <section id="leaderboard" class="leaderboard-section">
+            <h2>Top Infectors</h2>
+            <ul id="leaderboard-list" aria-live="polite"></ul>
+        </section>
+        <section id="world-map" class="map-section" aria-label="World Virus Spread Map"></section>
+        <a href="https://t.me/your_channel" target="_blank" rel="noopener noreferrer" class="tg-link">Join Telegram Community</a>
     </div>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
