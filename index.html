@@ -4,1563 +4,282 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>ЗомбиГлобал</title>
-
+  <title>ZOMBIЕGLOBAL</title>
   <style>
     :root{
-      --bg:#05070B;
-      --panel:rgba(12,16,22,.72);
-      --panel2:rgba(10,13,18,.82);
-      --border:rgba(255,255,255,.12);
-      --t1:#EAF7F1;
-      --t2:rgba(234,247,241,.66);
-      --g:#45FF75;
-      --c:#2FA9FF;
-      --r:#FF3D4D;
-      --y:#FFD34A;
-      --p:#B96BFF;
-      --radius:22px;
-      --shadow:0 26px 110px rgba(0,0,0,.62);
-      --shadow2:0 18px 70px rgba(0,0,0,.52);
+      --bg:#070A0F; --glass:rgba(10,14,20,.62); --b:rgba(255,255,255,.12);
+      --t:#EAF7F1; --m:rgba(234,247,241,.65);
+      --g:#45FF75; --c:#2FA9FF; --r:#FF3D4D;
+      --rad:18px; --sh:0 24px 90px rgba(0,0,0,.65);
     }
-
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--t1);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-    body{overscroll-behavior:none}
-    #app{position:fixed;inset:0;overflow:hidden;background:
-      radial-gradient(140% 90% at 50% 0%, rgba(47,169,255,.10), rgba(0,0,0,.90));
-    }
-
-    /* premium film grain + scan */
-    #app::before{
-      content:""; position:absolute; inset:-30px; pointer-events:none;
-      background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 1px 7px);
-      opacity:.07; mix-blend-mode:overlay;
-    }
-    #app::after{
-      content:""; position:absolute; inset:0; pointer-events:none;
-      background-image:radial-gradient(rgba(255,255,255,.045) 1px, rgba(0,0,0,0) 1px);
+    *{box-sizing:border-box} html,body{height:100%;margin:0;background:var(--bg);color:var(--t);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    #root{position:fixed;inset:0;overflow:hidden}
+    .safe{padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+    .bg{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0%, rgba(47,169,255,.10), rgba(0,0,0,.92))}
+    .bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;filter:saturate(1.1) contrast(1.05)}
+    .grain{position:absolute;inset:-20px;pointer-events:none;opacity:.06;mix-blend-mode:overlay;
+      background-image:radial-gradient(rgba(255,255,255,.06) 1px, rgba(0,0,0,0) 1px);
       background-size:3px 3px;
-      opacity:.055; mix-blend-mode:overlay;
     }
 
-    /* safe area */
-    .safe{
-      padding:
-        max(14px, env(safe-area-inset-top))
-        max(14px, env(safe-area-inset-right))
-        max(14px, env(safe-area-inset-bottom))
-        max(14px, env(safe-area-inset-left));
-    }
-
-    /* screens */
     .screen{position:absolute;inset:0;display:none}
-    .screen.active{display:block}
-    .fade{animation:fade .16s ease-out}
-    @keyframes fade{from{opacity:0;transform:scale(.996)}to{opacity:1;transform:scale(1)}}
+    .screen.on{display:block}
 
-    /* common UI */
-    .panel{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(12px);
+    .glass{background:var(--glass);border:1px solid var(--b);border-radius:var(--rad);backdrop-filter:blur(14px);box-shadow:var(--sh)}
+    .btn{all:unset;cursor:pointer;user-select:none;text-align:center;
+      padding:14px 16px;border-radius:16px;border:1px solid var(--b);
+      background:rgba(255,255,255,.06);letter-spacing:.12em;text-transform:uppercase;font-weight:900;font-size:12px
     }
-    .panel2{
-      background:var(--panel2);
-      border:1px solid rgba(255,255,255,.11);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow2);
-      backdrop-filter: blur(12px);
-    }
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
-    .muted{color:var(--t2);line-height:1.55}
-    .tiny{font-size:12px;color:rgba(234,247,241,.56);line-height:1.45}
-    .row{display:flex;gap:10px;align-items:center}
-    .col{display:flex;flex-direction:column;gap:10px}
+    .btn.primary{background:rgba(69,255,117,.14);border-color:rgba(69,255,117,.25)}
+    .btn.blue{background:rgba(47,169,255,.12);border-color:rgba(47,169,255,.22)}
+    .btn.red{background:rgba(255,61,77,.12);border-color:rgba(255,61,77,.22)}
+    .muted{color:var(--m);line-height:1.5}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 
-    .btn{
-      all:unset; cursor:pointer; user-select:none;
-      padding:14px 16px; border-radius:18px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.06);
-      backdrop-filter: blur(12px);
-      text-align:center;
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      font-weight:950;
-      transition:transform .08s ease, filter .14s ease, background .14s ease;
-    }
-    .btn:active{transform:translateY(1px)}
-    .btn.primary{background:rgba(69,255,117,.16);border-color:rgba(69,255,117,.26)}
-    .btn.secondary{background:rgba(47,169,255,.12);border-color:rgba(47,169,255,.22)}
-    .btn.danger{background:rgba(255,61,77,.12);border-color:rgba(255,61,77,.24)}
-    .btn.gold{background:rgba(255,211,74,.12);border-color:rgba(255,211,74,.26)}
-    .btn.purple{background:rgba(185,107,255,.12);border-color:rgba(185,107,255,.24)}
-    .btn.big{padding:16px 18px;border-radius:20px;font-size:13px}
+    /* INTRO: centered YouTube-style player */
+    .introWrap{height:100%;display:grid;place-items:center}
+    .introCard{width:min(980px,94vw);padding:14px}
+    .introTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .brand{letter-spacing:.22em;text-transform:uppercase;font-weight:950;font-size:14px}
+    .tag{margin-top:6px;color:var(--m);font-size:12px;letter-spacing:.08em}
+    .player{margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid var(--b);background:#000;aspect-ratio:16/9}
+    .player video{width:100%;height:100%;object-fit:contain}
+    .introActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .hint{margin-top:10px;font-size:12px;color:rgba(234,247,241,.55)}
 
-    .chip{
-      display:inline-flex;align-items:center;gap:10px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.30);
-      border-radius:999px;
-      padding:10px 12px;
-      backdrop-filter: blur(12px);
-      user-select:none;
-    }
-    .label{
-      font-size:11px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      font-weight:950;
-      color:rgba(234,247,241,.62);
-    }
+    /* TIKTOK-ish MAIN */
+    .main{height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:12px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .topbar .left{display:flex;flex-direction:column;gap:4px}
+    .topbar .title{letter-spacing:.22em;text-transform:uppercase;font-weight:950;font-size:14px}
+    .topbar .sub{color:var(--m);font-size:12px;letter-spacing:.08em}
 
-    .field{
-      width:100%;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.05);
-      padding:12px 12px;
-      color:rgba(234,247,241,.92);
-      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    }
+    .stage{position:relative;display:grid;grid-template-columns:1fr auto;gap:12px;min-height:0}
+    .feed{position:relative;min-height:0}
+    .card{padding:14px;display:flex;flex-direction:column;gap:10px}
+    .big{font-size:28px;font-weight:950;letter-spacing:.06em}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:10px 12px;border-radius:999px;border:1px solid var(--b);background:rgba(0,0,0,.28)}
+    .dot{width:8px;height:8px;border-radius:50%}
+    .dot.g{background:rgba(69,255,117,.9)} .dot.c{background:rgba(47,169,255,.9)} .dot.r{background:rgba(255,61,77,.9)}
 
-    /* BOOT */
-    #boot{display:flex;align-items:center;justify-content:center}
-    .bootBox{width:min(560px,92vw);padding:18px}
-    .logo{
-      margin:0;
-      letter-spacing:.20em;
-      text-transform:uppercase;
-      font-weight:950;
+    .rightbar{display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:flex-end}
+    .act{all:unset;cursor:pointer;width:54px;height:54px;border-radius:18px;border:1px solid var(--b);
+      background:rgba(0,0,0,.30);backdrop-filter:blur(14px);display:grid;place-items:center
     }
-    .bar{height:10px;border-radius:999px;border:1px solid var(--border);overflow:hidden;background:rgba(255,255,255,.05);margin-top:12px}
-    .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--g),var(--c))}
+    .act span{font-size:11px;color:rgba(234,247,241,.75);letter-spacing:.12em;text-transform:uppercase;font-weight:900}
+    .nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .nav .btn{padding:16px 12px}
 
-    /* INTRO (video 16:9 cropped to portrait) */
-    #intro{position:absolute;inset:0}
-    .introVideo{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      object-fit:cover; /* <-- key for YouTube 16:9 */
-      background:#000;
-      filter:saturate(1.04) contrast(1.06);
-    }
-    .introShade{
-      position:absolute; inset:0;
-      background:
-        radial-gradient(120% 80% at 50% 10%, rgba(69,255,117,.18), rgba(0,0,0,.86)),
-        linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.68));
-      pointer-events:none;
-    }
-    .introHUD{
-      position:absolute; inset:0;
-      display:flex; align-items:flex-end; justify-content:center;
-    }
-    .introCard{
-      width:min(760px,94vw);
-      margin:14px;
-      padding:14px;
-    }
-    .introTop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-    .kbd{
-      display:inline-block;
-      padding:7px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.06);
-      font-weight:950;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-    }
-    .introTitle{
-      margin:10px 0 0;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      font-weight:950;
-      font-size:18px;
-    }
-    .introSub{margin:10px 0 0}
-    .topRight{display:flex;gap:10px;align-items:center}
-    .iconBtn{
-      all:unset; cursor:pointer;
-      width:44px;height:44px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.35);
-      display:grid;place-items:center;
-      backdrop-filter: blur(12px);
-    }
-    .iconBtn svg{opacity:.9}
-    .introActions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-    .introActions .btn{padding:16px 18px;border-radius:20px}
-
-    /* HOME (vertical premium) */
-    #home{position:absolute;inset:0}
-    .homeBg{
-      position:absolute; inset:0;
-      background:
-        radial-gradient(90% 60% at 50% 0%, rgba(185,107,255,.10), rgba(0,0,0,0)),
-        radial-gradient(120% 90% at 50% 0%, rgba(47,169,255,.08), rgba(0,0,0,.92));
-      filter:saturate(1.02);
-    }
-    .homeWrap{
-      position:absolute; inset:0;
-      display:flex; flex-direction:column;
-      gap:12px;
-    }
-
-    .topBar{
-      display:flex; justify-content:space-between; align-items:center; gap:10px;
-    }
-    .brand{
-      display:flex; flex-direction:column; gap:4px;
-    }
-    .brand h1{margin:0;font-size:16px;letter-spacing:.22em;text-transform:uppercase;font-weight:950}
-    .brand .tag{font-size:11px;color:rgba(234,247,241,.56);letter-spacing:.10em;text-transform:uppercase}
-    .statRow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .statChip{display:inline-flex;align-items:center;gap:8px}
-    .dot{
-      width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.18);
-      box-shadow:0 0 0 3px rgba(255,255,255,.04);
-    }
-    .dot.g{background:rgba(69,255,117,.85)}
-    .dot.c{background:rgba(47,169,255,.85)}
-    .dot.r{background:rgba(255,61,77,.85)}
-    .dot.y{background:rgba(255,211,74,.85)}
-
-    .grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
-    }
-
-    .card{padding:14px}
-    .idBig{font-size:30px;font-weight:950;letter-spacing:.08em;margin:6px 0 0}
-    .metaRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-
-    .ctaStack{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-    .ctaStack .btn{padding:16px 18px;border-radius:20px}
-
-    .bottomNav{
-      margin-top:auto;
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr 1fr;
-      gap:10px;
-      padding:12px;
-      border-radius:26px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.28);
-      backdrop-filter: blur(14px);
-      box-shadow:0 30px 120px rgba(0,0,0,.45);
-    }
-    .navBtn{
-      all:unset; cursor:pointer; user-select:none;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:6px;
-      padding:12px 10px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-    }
-    .navBtn.active{background:rgba(47,169,255,.12);border-color:rgba(47,169,255,.22)}
-    .navBtn svg{opacity:.9}
-    .navBtn span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:950;color:rgba(234,247,241,.78)}
-
-    /* SHEET MODAL */
-    .modal{
-      position:fixed; inset:0;
-      display:none;
-      align-items:flex-end; justify-content:center;
-      background:rgba(0,0,0,.58);
-      z-index:50;
-    }
-    .modal.active{display:flex}
-    .sheet{
-      width:min(820px,96vw);
-      max-height:80vh;
-      overflow:auto;
-      border-radius:26px 26px 0 0;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(10,13,18,.90);
-      backdrop-filter: blur(16px);
-      box-shadow:0 -30px 120px rgba(0,0,0,.70);
-      padding:14px;
-    }
-    .sheetHead{display:flex;justify-content:space-between;align-items:center;gap:10px}
-    .sheetTitle{
-      margin:0;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      font-weight:950;
-      font-size:14px;
-    }
-
-    /* GAME */
-    #game{position:absolute;inset:0}
-    .gameBg{
-      position:absolute; inset:0;
-      background:
-        radial-gradient(120% 80% at 50% 0%, rgba(69,255,117,.08), rgba(0,0,0,.92));
-    }
-
-    .hud{
-      position:absolute; left:0; right:0; top:0;
-      display:flex; justify-content:space-between; align-items:flex-start;
-      gap:10px;
-      z-index:5;
-      pointer-events:none;
-    }
-    .hudBox{
-      pointer-events:none;
-      padding:10px 12px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(10,13,18,.66);
-      backdrop-filter: blur(14px);
-      display:flex; gap:12px; align-items:center;
-      box-shadow:0 18px 70px rgba(0,0,0,.35);
-    }
-    .hudVal{font-size:18px;font-weight:950;letter-spacing:.06em}
-    .hearts{display:flex;gap:6px;align-items:center}
-    .heart{
-      width:14px;height:14px;border-radius:5px;
-      background:rgba(255,61,77,.22);
-      border:1px solid rgba(255,61,77,.30);
-      box-shadow:0 10px 30px rgba(0,0,0,.25);
-    }
-    .heart.on{background:rgba(255,61,77,.78)}
-    .meter{width:150px;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);overflow:hidden;background:rgba(255,255,255,.05);margin-top:6px}
-    .meterFill{height:100%;width:0%;background:linear-gradient(90deg,var(--c),var(--r))}
-
-    .canvasWrap{
-      position:absolute; inset:0;
-      padding:12px;
-      z-index:2;
-      touch-action:none;
-    }
-    canvas{
-      width:100%; height:100%;
-      border-radius:26px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.02);
-    }
-
-    .controls{
-      position:absolute; left:12px; right:12px; bottom:12px;
-      display:grid; grid-template-columns:1fr 1fr;
-      gap:10px;
-      z-index:6;
-    }
-    .tapZone{
-      height:74px;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.26);
-      backdrop-filter: blur(14px);
-      display:flex; align-items:center; justify-content:center;
-      user-select:none;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      font-weight:950;
-      color:rgba(234,247,241,.72);
-    }
-    .tapZone:active{transform:translateY(1px)}
-    .quitRow{
-      position:absolute; left:12px; right:12px; bottom:96px;
-      display:flex; justify-content:space-between; align-items:center; gap:10px;
-      z-index:6;
-    }
-    .tip{
-      flex:1;
-      font-size:11px;
-      color:rgba(234,247,241,.68);
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      background:rgba(0,0,0,.32);
-      border:1px solid rgba(255,255,255,.10);
-      padding:10px 12px;
-      border-radius:18px;
-      backdrop-filter: blur(14px);
-      overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
-    }
-    .quitBtn{width:110px}
-
-    /* RESULT */
-    #result{position:absolute;inset:0}
-    .resultBg{
-      position:absolute; inset:0;
-      background:radial-gradient(120% 90% at 50% 0%, rgba(47,169,255,.10), rgba(0,0,0,.92));
-    }
-    .resultWrap{
-      position:absolute; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      padding:14px;
-      z-index:5;
-    }
-    .resultCard{width:min(860px,94vw);padding:14px}
-    .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .stat{padding:14px}
-    .statVal{font-size:30px;font-weight:950;letter-spacing:.06em;margin-top:6px}
-    .actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-    .actions .btn{padding:16px 18px;border-radius:20px}
-
-    @media (min-width: 900px){
-      .grid{grid-template-columns:1fr 1fr}
-      .actions{grid-template-columns:1fr 1fr}
-      .ctaStack{grid-template-columns:1fr 1fr}
-      .introActions{grid-template-columns:1fr 1fr}
+    @media (max-width:560px){
+      .introActions{grid-template-columns:1fr}
+      .stage{grid-template-columns:1fr}
+      .rightbar{flex-direction:row;justify-content:space-between}
     }
   </style>
 </head>
-
 <body>
-<div id="app">
-
-  <!-- BOOT -->
-  <div class="screen active" id="boot">
-    <div class="panel bootBox">
-      <h1 class="logo">ЗомбиГлобал</h1>
-      <div class="muted" style="margin-top:8px">
-        Система заражения запускается…
-      </div>
-      <div class="bar"><div class="fill" id="bootFill"></div></div>
-      <div class="tiny" style="margin-top:10px">
-        Вертикальный UI • интро YouTube 16:9 обрезается красиво • звук только после тапа (правило iOS)
-      </div>
-    </div>
+<div id="root">
+  <div class="bg">
+    <video id="bgv" playsinline autoplay muted loop></video>
   </div>
+  <div class="grain"></div>
 
   <!-- INTRO -->
-  <div class="screen" id="intro">
-    <video class="introVideo" id="introVideo" playsinline muted autoplay></video>
-    <div class="introShade"></div>
-
-    <div class="introHUD safe">
-      <div class="panel introCard">
+  <section id="intro" class="screen on safe">
+    <div class="introWrap">
+      <div class="introCard glass">
         <div class="introTop">
           <div>
-            <span class="kbd">THE VIRUS IS THE LINK</span>
-            <h2 class="introTitle">Вирус — это ссылка. Ты оставляешь след.</h2>
-            <p class="introSub muted">
-              Получи Infection ID → бей рекорд → делай share-card → люди заходят по твоей ссылке.
-            </p>
+            <div class="brand">ZOMBIEGLOBAL</div>
+            <div class="tag">вирус = ссылка • цепочка заражений • сезонный топ</div>
           </div>
+          <button class="btn blue" id="skip">SKIP</button>
+        </div>
 
-          <div class="topRight">
-            <button class="iconBtn" id="soundToggle" title="Sound">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M11 5L6 9H3v6h3l5 4V5z" stroke="rgba(234,247,241,.85)" stroke-width="2" stroke-linejoin="round"/>
-                <path id="soundWave" d="M15 9c1 .9 1.5 1.9 1.5 3S16 14.1 15 15" stroke="rgba(234,247,241,.75)" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </button>
-            <button class="iconBtn" id="skipIntro" title="Skip">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M6 18L18 6" stroke="rgba(234,247,241,.85)" stroke-width="2" stroke-linecap="round"/>
-                <path d="M6 6l12 12" stroke="rgba(234,247,241,.85)" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </button>
-          </div>
+        <div class="player">
+          <video id="introV" playsinline preload="auto"></video>
         </div>
 
         <div class="introActions">
-          <button class="btn primary big" id="tapStart">TAP TO START (SOUND ON)</button>
-          <button class="btn secondary big" id="tapStartMuted">START MUTED</button>
+          <button class="btn primary" id="startSound">START (SOUND)</button>
+          <button class="btn" id="startMute">START (MUTED)</button>
         </div>
 
-        <div class="tiny" style="margin-top:10px">
-          На iPhone браузер **не даст автозвук**. Но после одного тапа — звук включается.
-        </div>
+        <div class="hint">iPhone: звук включается только после нажатия кнопки — это правило Safari.</div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- HOME -->
-  <div class="screen" id="home">
-    <div class="homeBg"></div>
-    <div class="homeWrap safe">
+  <!-- MAIN -->
+  <section id="main" class="screen safe">
+    <div class="main">
+      <header class="topbar">
+        <div class="left">
+          <div class="title">ZOMBIEGLOBAL</div>
+          <div class="sub">сезон <span id="season" class="mono">—</span> • spreads <span id="spreads" class="mono">0</span></div>
+        </div>
+        <button class="btn red" id="reset">RESET</button>
+      </header>
 
-      <div class="topBar">
-        <div class="brand">
-          <h1>ЗомбиГлобал</h1>
-          <div class="tag">лучший мем-вирус • сезонный топ • турниры</div>
+      <div class="stage">
+        <div class="feed">
+          <div class="glass card">
+            <div class="pill"><span class="dot g"></span><span class="mono" id="id">#------</span><span class="muted">твоя метка</span></div>
+            <div class="big mono" id="link">—</div>
+            <div class="muted">Зашёл по ссылке → ты заражён “от #<span class="mono" id="by">------</span>”. Разнеси дальше и стань источником.</div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <button class="btn primary" id="copy">COPY LINK</button>
+              <button class="btn blue" id="share">SHARE</button>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <button class="btn" id="tgCh">TG CHANNEL</button>
+              <button class="btn" id="tgBot">TG BOT</button>
+            </div>
+
+            <div class="muted" style="font-size:12px">
+              Дальше сюда добавим: карта мира, топ месяца, турниры, твой “след” в истории.
+              Сейчас — **правильный TikTok-интерфейс** + вирус-ссылка.
+            </div>
+          </div>
         </div>
 
-        <div class="statRow">
-          <div class="chip statChip">
-            <span class="dot y"></span>
-            <span class="label">Season</span>
-            <span class="mono" id="uiSeason">—</span>
-          </div>
-          <div class="chip statChip">
-            <span class="dot g"></span>
-            <span class="label">Spreads</span>
-            <span class="mono" id="uiSpreads">0</span>
-          </div>
-        </div>
+        <aside class="rightbar">
+          <button class="act" id="actTop" title="Top">
+            <span>TOP</span>
+          </button>
+          <button class="act" id="actMap" title="World">
+            <span>MAP</span>
+          </button>
+          <button class="act" id="actPlay" title="Play">
+            <span>PLAY</span>
+          </button>
+        </aside>
       </div>
 
-      <div class="grid">
-        <!-- Identity card -->
-        <div class="panel card">
-          <div class="label">ТВОЙ INFECTION ID</div>
-          <div class="idBig mono" id="uiId">#------</div>
-
-          <div class="metaRow">
-            <span class="chip mono" id="uiCountry">--</span>
-            <span class="chip" id="uiBy">Заражен от: #------</span>
-            <span class="chip"><span class="label">Lvl</span> <span class="mono" id="uiLvl">1</span></span>
-            <span class="chip"><span class="label">Streak</span> <span class="mono" id="uiStreak">0</span></span>
-          </div>
-
-          <div class="muted" style="margin-top:12px">Твоя вирус-ссылка:</div>
-          <div class="field mono" id="uiLink">—</div>
-
-          <div class="row" style="margin-top:10px;flex-wrap:wrap">
-            <button class="btn primary" id="copyLink">COPY LINK</button>
-            <button class="btn secondary" id="openInfect">HOW IT SPREADS</button>
-          </div>
-
-          <div class="tiny" style="margin-top:10px">
-            **Spreads** растёт, когда ты копируешь ссылку/карточку и раздаёшь её. Потом мы подключим реальную статистику с бэкендом.
-          </div>
-        </div>
-
-        <!-- Play card -->
-        <div class="panel card">
-          <div class="label">GAME MODE</div>
-          <div style="margin-top:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;font-size:16px">
-            LANE OUTBREAK
-          </div>
-          <p class="muted" style="margin:10px 0 0">
-            Свайпы влево/вправо. 3 линии. Зелёные — очки + комбо. Красные — урон.
-            Редкие бонусы: щит / слоумо.
-          </p>
-
-          <div class="ctaStack">
-            <button class="btn primary big" id="play">PLAY</button>
-            <button class="btn gold big" id="missions">DAILY MISSIONS</button>
-          </div>
-
-          <div class="row" style="margin-top:10px;flex-wrap:wrap">
-            <button class="btn secondary" id="tgChannel">TG CHANNEL</button>
-            <button class="btn secondary" id="tgBot">TG BOT</button>
-          </div>
-
-          <div class="tiny" style="margin-top:10px">
-            Это не “одноразовая демка”: миссии обновляются каждый день, стрик даёт бонус, а share-card — крючок вирусности.
-          </div>
-        </div>
-      </div>
-
-      <!-- Bottom nav -->
-      <div class="bottomNav">
-        <button class="navBtn active" id="navPlay">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M9 7l10 5-10 5V7z" fill="rgba(234,247,241,.88)"/>
-          </svg>
-          <span>Play</span>
-        </button>
-        <button class="navBtn" id="navMap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2V6z" stroke="rgba(234,247,241,.85)" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M9 4v14M15 6v14" stroke="rgba(234,247,241,.45)" stroke-width="2"/>
-          </svg>
-          <span>World</span>
-        </button>
-        <button class="navBtn" id="navLineage">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M7 7h10M7 12h10M7 17h10" stroke="rgba(234,247,241,.75)" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="5" cy="7" r="1.5" fill="rgba(69,255,117,.9)"/>
-            <circle cx="5" cy="12" r="1.5" fill="rgba(47,169,255,.9)"/>
-            <circle cx="5" cy="17" r="1.5" fill="rgba(255,61,77,.9)"/>
-          </svg>
-          <span>Chain</span>
-        </button>
-        <button class="navBtn" id="navTop">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M7 21V11M12 21V6M17 21V14" stroke="rgba(234,247,241,.85)" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <span>Top</span>
-        </button>
-      </div>
-
+      <nav class="nav">
+        <button class="btn primary" id="goPlay">PLAY NOW</button>
+        <button class="btn" id="goTop">MONTH TOP</button>
+        <button class="btn" id="goMap">WORLD MAP</button>
+      </nav>
     </div>
-  </div>
-
-  <!-- SHEET MODAL -->
-  <div class="modal" id="modal">
-    <div class="sheet">
-      <div class="sheetHead">
-        <h3 class="sheetTitle" id="modalTitle">TITLE</h3>
-        <button class="iconBtn" id="modalClose" title="Close">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M6 18L18 6" stroke="rgba(234,247,241,.85)" stroke-width="2" stroke-linecap="round"/>
-            <path d="M6 6l12 12" stroke="rgba(234,247,241,.85)" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </button>
-      </div>
-      <div id="modalBody" style="margin-top:10px"></div>
-    </div>
-  </div>
-
-  <!-- GAME -->
-  <div class="screen" id="game">
-    <div class="gameBg"></div>
-
-    <div class="hud safe">
-      <div class="hudBox">
-        <div>
-          <div class="label">TIME</div>
-          <div class="hudVal mono" id="hudTime">00:25</div>
-        </div>
-        <div>
-          <div class="label">SCORE</div>
-          <div class="hudVal mono" id="hudScore">0</div>
-        </div>
-        <div>
-          <div class="label">MULTI</div>
-          <div class="hudVal mono" id="hudMulti">1.0x</div>
-        </div>
-      </div>
-
-      <div class="hudBox">
-        <div>
-          <div class="label">HP</div>
-          <div class="hearts" id="hudHearts"></div>
-          <div style="margin-top:8px" class="label">PANIC</div>
-          <div class="meter"><div class="meterFill" id="panicFill"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="canvasWrap safe" id="canvasWrap">
-      <canvas id="gameCanvas"></canvas>
-    </div>
-
-    <div class="quitRow safe">
-      <div class="tip" id="hudTip">Swipe ◀ / ▶ to change lane • GREEN = combo • RED = damage</div>
-      <button class="btn danger quitBtn" id="quit">QUIT</button>
-    </div>
-
-    <div class="controls safe">
-      <div class="tapZone" id="tapLeft">◀ LEFT</div>
-      <div class="tapZone" id="tapRight">RIGHT ▶</div>
-    </div>
-  </div>
-
-  <!-- RESULT -->
-  <div class="screen" id="result">
-    <div class="resultBg"></div>
-    <div class="resultWrap safe">
-      <div class="panel resultCard">
-        <div class="stats">
-          <div class="panel2 stat">
-            <div class="label">RUN SCORE</div>
-            <div class="statVal mono" id="resScore">0</div>
-            <div class="tiny" id="resBonus">—</div>
-          </div>
-          <div class="panel2 stat">
-            <div class="label">BEST</div>
-            <div class="statVal mono" id="resBest">0</div>
-            <div class="tiny" id="resStreak">—</div>
-          </div>
-        </div>
-
-        <div class="muted" style="margin:12px 0 6px">Твоя вирус-ссылка:</div>
-        <div class="field mono" id="resLink">—</div>
-
-        <div class="actions">
-          <button class="btn primary big" id="copyRes">COPY LINK</button>
-          <button class="btn secondary big" id="downloadCard">DOWNLOAD SHARE-CARD</button>
-          <button class="btn primary big" id="retry">RETRY</button>
-          <button class="btn secondary big" id="back">BACK</button>
-        </div>
-
-        <div class="tiny" style="margin-top:10px">
-          Share-card — это то, что люди реально репостят. Мы делаем, чтобы каждый хотел перебить твой рекорд и зайти по твоей ссылке.
-        </div>
-      </div>
-    </div>
-
-    <canvas id="shareCanvas" width="1080" height="1920" style="display:none"></canvas>
-  </div>
-
+  </section>
 </div>
 
 <script>
-/* ----------------------------- CONFIG ----------------------------- */
-const INTRO_VIDEO = "assets/video/intro.mp4";
-const TG_CHANNEL  = "https://t.me/zombievirus_server";
-const TG_BOT      = "https://t.me/ZombieVirusLabBot";
+  // ---- CONFIG ----
+  const INTRO_SRC = "assets/intro.mp4";
+  const BG_SRC    = "assets/bg.mp4"; // optional (можно не класть файл)
+  const TG_CH     = "https://t.me/zombievirus_server";
+  const TG_BOT    = "https://t.me/ZombieVirusLabBot";
 
-/* ----------------------------- ROUTER ----------------------------- */
-const screens = {
-  boot:   document.getElementById('boot'),
-  intro:  document.getElementById('intro'),
-  home:   document.getElementById('home'),
-  game:   document.getElementById('game'),
-  result: document.getElementById('result'),
-};
-function show(name){
-  Object.values(screens).forEach(s=>s.classList.remove('active','fade'));
-  screens[name].classList.add('active','fade');
-}
+  // ---- HELPERS ----
+  const $ = s => document.querySelector(s);
+  const LS = { id:"zg_id", by:"zg_by", spreads:"zg_spreads" };
+  const pad = n => String(n).padStart(6,"0");
+  const base = () => location.href.split("#")[0].split("?")[0];
+  const getQ = k => new URL(location.href).searchParams.get(k);
+  const link = id => `${base()}?ref=${id}`;
 
-/* ----------------------------- STORAGE ----------------------------- */
-const LS = {
-  id:'zg_id',
-  by:'zg_by',
-  best:'zg_best',
-  spreads:'zg_spreads',
-  xp:'zg_xp',
-  streak:'zg_streak',
-  country:'zg_country',
-  missionsDay:'zg_mday',
-  missions:'zg_missions',
-  sound:'zg_sound',
-  creator:'zg_creator',
-};
-
-function pad6(n){return String(n).padStart(6,'0');}
-function baseUrl(){return window.location.href.split('#')[0].split('?')[0];}
-function params(){
-  const u=new URL(window.location.href);
-  return { ref:u.searchParams.get('ref'), creator:u.searchParams.get('creator') };
-}
-
-function getCountry(){
-  let c=localStorage.getItem(LS.country);
-  if(!c){ c='AT'; localStorage.setItem(LS.country,c); }
-  return c;
-}
-
-function getOrCreateId(){
-  const p=params();
-  if (p.creator==='1') localStorage.setItem(LS.creator,'1');
-  if (localStorage.getItem(LS.creator)==='1'){
-    localStorage.setItem(LS.id,'000001');
-    return '000001';
+  function getId(){
+    let id = localStorage.getItem(LS.id);
+    if(!id){ id = pad((Math.random()*900000+100000)|0); localStorage.setItem(LS.id,id); }
+    return id;
   }
-  let id=localStorage.getItem(LS.id);
-  if(!id){
-    id=pad6(Math.floor(100000 + Math.random()*900000));
-    localStorage.setItem(LS.id,id);
-  }
-  return id;
-}
-
-function initRef(){
-  const p=params();
-  if (p.ref && /^\d{6}$/.test(p.ref)){
-    const my=getOrCreateId();
-    if (p.ref !== my) localStorage.setItem(LS.by, p.ref);
-  }
-}
-
-function infectLink(id){ return `${baseUrl()}?ref=${id}`; }
-
-function getSpreads(){ return parseInt(localStorage.getItem(LS.spreads)||'0',10); }
-function addSpreads(n=1){
-  const v=getSpreads()+n;
-  localStorage.setItem(LS.spreads, String(v));
-  return v;
-}
-
-function getXP(){ return parseInt(localStorage.getItem(LS.xp)||'0',10); }
-function addXP(n){ localStorage.setItem(LS.xp, String(getXP()+n)); }
-
-function levelFromXP(xp){
-  // плавная, приятная прогрессия
-  return Math.max(1, Math.floor(Math.sqrt(xp/120))+1);
-}
-
-function getStreak(){ return parseInt(localStorage.getItem(LS.streak)||'0',10); }
-function setStreak(v){ localStorage.setItem(LS.streak, String(Math.max(0,v))); }
-
-/* ----------------------------- UI UPDATE ----------------------------- */
-function updateHomeUI(){
-  const id=getOrCreateId();
-  const by=localStorage.getItem(LS.by)||'------';
-  const season = `#${new Date().getMonth()+1}`;
-
-  document.getElementById('uiId').textContent = `#${id}`;
-  document.getElementById('uiBy').textContent = `Заражен от: #${by}`;
-  document.getElementById('uiCountry').textContent = getCountry();
-  document.getElementById('uiSeason').textContent = season;
-  document.getElementById('uiLink').textContent = infectLink(id);
-  document.getElementById('uiSpreads').textContent = String(getSpreads());
-
-  const lvl = levelFromXP(getXP());
-  document.getElementById('uiLvl').textContent = String(lvl);
-  document.getElementById('uiStreak').textContent = String(getStreak());
-}
-
-/* ----------------------------- MODAL ----------------------------- */
-const modal=document.getElementById('modal');
-const modalTitle=document.getElementById('modalTitle');
-const modalBody=document.getElementById('modalBody');
-document.getElementById('modalClose').onclick=()=>modal.classList.remove('active');
-function openModal(title, html){
-  modalTitle.textContent=title;
-  modalBody.innerHTML=html;
-  modal.classList.add('active');
-}
-
-/* ----------------------------- SOUND (iOS rule: only after user gesture) ----------------------------- */
-const introVideo=document.getElementById('introVideo');
-let soundEnabled = (localStorage.getItem(LS.sound) ?? '1') === '1';
-
-function setSound(on){
-  soundEnabled = !!on;
-  localStorage.setItem(LS.sound, soundEnabled ? '1' : '0');
-  const wave = document.getElementById('soundWave');
-  if (wave) wave.style.opacity = soundEnabled ? '1' : '.25';
-}
-setSound(soundEnabled);
-
-document.getElementById('soundToggle').onclick = ()=>{
-  setSound(!soundEnabled);
-  // если пользователь включил звук и мы на интро — попробуем сразу включить (если жест уже был)
-  if (screens.intro.classList.contains('active')){
-    tryEnableIntroAudio();
-  }
-};
-
-async function tryEnableIntroAudio(){
-  // попытаемся включить звук только если soundEnabled
-  if (!soundEnabled) return;
-  try{
-    introVideo.muted = false;
-    introVideo.volume = 1;
-    await introVideo.play();
-  }catch(e){
-    // если iOS ещё не “разлочил” — ок, будет на следующем тапе
-  }
-}
-
-/* ----------------------------- CLIPBOARD ----------------------------- */
-async function copyText(text){
-  try{
-    await navigator.clipboard.writeText(text);
-    return true;
-  }catch(e){
-    try{ window.prompt("Copy this:", text); }catch(_){}
-    return false;
-  }
-}
-
-/* ----------------------------- DAILY MISSIONS (local prototype) ----------------------------- */
-const missionPool = [
-  {id:'m1', name:'Собери 30 зелёных', type:'greens', target:30},
-  {id:'m2', name:'Собери 45 зелёных', type:'greens', target:45},
-  {id:'m3', name:'Сделай комбо x12', type:'combo', target:12},
-  {id:'m4', name:'Выживи 25 сек', type:'survive', target:25},
-  {id:'m5', name:'Набери 900+ очков', type:'score', target:900},
-];
-
-function todayKey(){
-  const d=new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function loadMissions(){
-  const day=todayKey();
-  const savedDay=localStorage.getItem(LS.missionsDay);
-  if(savedDay !== day){
-    // new day -> new missions
-    const picks = [];
-    const used = new Set();
-    while(picks.length < 3){
-      const m = missionPool[(Math.random()*missionPool.length)|0];
-      if(used.has(m.id)) continue;
-      used.add(m.id);
-      picks.push({ ...m, progress:0, done:false, claimed:false });
+  function initRef(){
+    const ref = getQ("ref");
+    if(ref && /^\d{6}$/.test(ref)){
+      const me = getId();
+      if(ref !== me) localStorage.setItem(LS.by, ref);
     }
-    localStorage.setItem(LS.missionsDay, day);
-    localStorage.setItem(LS.missions, JSON.stringify(picks));
   }
-  try{
-    return JSON.parse(localStorage.getItem(LS.missions) || '[]');
-  }catch(e){
-    return [];
+  function spreads(add=0){
+    const v = (parseInt(localStorage.getItem(LS.spreads)||"0",10) + add);
+    localStorage.setItem(LS.spreads, String(v));
+    return v;
   }
-}
-
-function saveMissions(arr){
-  localStorage.setItem(LS.missions, JSON.stringify(arr));
-}
-
-function renderMissionsSheet(){
-  const arr=loadMissions();
-  const lines = arr.map((m,i)=>{
-    const pct = Math.min(100, Math.floor((m.progress/m.target)*100));
-    const done = m.done ? '✅' : '⏳';
-    const claimBtn = m.done && !m.claimed
-      ? `<button class="btn gold" data-claim="${i}" style="width:100%;margin-top:10px">CLAIM REWARD</button>`
-      : (m.claimed ? `<div class="tiny" style="margin-top:10px;color:rgba(69,255,117,.75)">Reward claimed.</div>` : '');
-    return `
-      <div class="panel2" style="padding:14px;border-radius:22px;margin-top:10px">
-        <div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap">
-          <div style="font-weight:950;letter-spacing:.10em;text-transform:uppercase;font-size:12px">${done} ${m.name}</div>
-          <div class="mono" style="opacity:.85">${m.progress}/${m.target}</div>
-        </div>
-        <div style="margin-top:10px;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);overflow:hidden">
-          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--c),var(--g))"></div>
-        </div>
-        ${claimBtn}
-      </div>
-    `;
-  }).join('');
-
-  openModal("DAILY MISSIONS", `
-    <div class="tiny">Миссии обновляются каждый день. Это то, что удерживает игроков “как тикток” — всегда есть цель.</div>
-    ${lines || `<div class="tiny" style="margin-top:10px">Нет миссий (ошибка). Перезагрузи страницу.</div>`}
-    <div class="tiny" style="margin-top:12px">Награда (прототип): +XP и +Spreads boost.</div>
-  `);
-
-  // hook claim buttons
-  const btns = modalBody.querySelectorAll('[data-claim]');
-  btns.forEach(b=>{
-    b.onclick=()=>{
-      const idx=parseInt(b.getAttribute('data-claim'),10);
-      const arr=loadMissions();
-      const m=arr[idx];
-      if(!m || !m.done || m.claimed) return;
-      m.claimed=true;
-      // reward
-      addXP(220);
-      addSpreads(2);
-      saveMissions(arr);
-      updateHomeUI();
-      renderMissionsSheet();
-    };
-  });
-}
-
-/* ----------------------------- BOOT ----------------------------- */
-const bootFill=document.getElementById('bootFill');
-let bp=0;
-const bt=setInterval(()=>{
-  bp+=10; bootFill.style.width=Math.min(bp,100)+'%';
-  if(bp>=100){ clearInterval(bt); startIntro(); }
-}, 55);
-
-/* ----------------------------- INTRO FLOW ----------------------------- */
-function startIntro(){
-  initRef();
-  updateHomeUI();
-  show('intro');
-
-  introVideo.src = INTRO_VIDEO;
-  // autoplay muted ok
-  introVideo.muted = true;
-  try{ introVideo.play(); }catch(e){}
-  // set sound icon
-  setSound(soundEnabled);
-}
-
-document.getElementById('skipIntro').onclick = ()=>{
-  introVideo.pause();
-  show('home'); updateHomeUI();
-};
-
-document.getElementById('tapStart').onclick = async ()=>{
-  // user gesture -> can unlock sound if enabled
-  if (soundEnabled){
-    await tryEnableIntroAudio();
+  async function copy(text){
+    try{ await navigator.clipboard.writeText(text); return true; }
+    catch(e){ prompt("Copy:", text); return false; }
   }
-  introVideo.pause();
-  show('home'); updateHomeUI();
-};
 
-document.getElementById('tapStartMuted').onclick = ()=>{
-  // keep muted
-  setSound(false);
-  introVideo.pause();
-  show('home'); updateHomeUI();
-};
+  function render(){
+    const id = getId();
+    $("#id").textContent = "#" + id;
+    $("#by").textContent = localStorage.getItem(LS.by) || "------";
+    $("#link").textContent = link(id);
+    $("#spreads").textContent = spreads(0);
+    $("#season").textContent = "#" + (new Date().getMonth()+1);
+  }
 
-/* ----------------------------- HOME ACTIONS ----------------------------- */
-document.getElementById('copyLink').onclick = async ()=>{
-  const id=getOrCreateId();
-  const ok = await copyText(infectLink(id));
-  if(ok){ addSpreads(1); updateHomeUI(); }
-};
+  function show(which){
+    $("#intro").classList.toggle("on", which==="intro");
+    $("#main").classList.toggle("on", which==="main");
+  }
 
-document.getElementById('openInfect').onclick = ()=>{
-  const id=getOrCreateId();
-  openModal("HOW IT SPREADS", `
-    <div class="tiny">
-      1) Ты копируешь **свою ссылку** и кидаешь людям.<br>
-      2) Кто заходит по ней — становится “infected by #${id}”.<br>
-      3) Он играет, делает share-card и разносит дальше — цепочка растёт.<br><br>
-      Сейчас это прототип без бэкенда, но **логика уже правильная**.
-    </div>
-    <div class="muted" style="margin-top:12px">Твоя ссылка:</div>
-    <div class="field mono" style="margin-top:10px">${infectLink(id)}</div>
-    <div class="row" style="margin-top:10px;flex-wrap:wrap">
-      <button class="btn primary" id="mCopy">COPY</button>
-      <button class="btn secondary" id="mTg">TG CHANNEL</button>
-      <button class="btn secondary" id="mBot">TG BOT</button>
-    </div>
-    <div class="tiny" style="margin-top:12px">
-      Вирусность держится на **картинке-карточке** + **простом соревновательном режиме** + **миссиях/стрике**.
-    </div>
-  `);
-  document.getElementById('mCopy').onclick = async ()=>{
-    const ok = await copyText(infectLink(id));
-    if(ok){ addSpreads(1); updateHomeUI(); }
+  // ---- INTRO SETUP ----
+  const introV = $("#introV");
+  introV.src = INTRO_SRC;
+  introV.muted = true;
+  introV.loop = true;
+  introV.play().catch(()=>{});
+
+  const bgv = $("#bgv");
+  bgv.src = BG_SRC;
+  bgv.play().catch(()=>{}); // если файла нет — просто будет пусто, не ломает
+
+  function enterMain(){
+    introV.pause();
+    show("main");
+    render();
+  }
+
+  $("#startSound").onclick = async ()=>{
+    try{ introV.muted = false; await introV.play(); }catch(e){}
+    enterMain();
   };
-  document.getElementById('mTg').onclick = ()=> window.open(TG_CHANNEL,"_blank");
-  document.getElementById('mBot').onclick = ()=> window.open(TG_BOT,"_blank");
-};
+  $("#startMute").onclick = ()=>{ introV.muted = true; enterMain(); };
+  $("#skip").onclick = ()=> enterMain();
 
-document.getElementById('missions').onclick = ()=> renderMissionsSheet();
-document.getElementById('tgChannel').onclick = ()=> window.open(TG_CHANNEL,"_blank");
-document.getElementById('tgBot').onclick = ()=> window.open(TG_BOT,"_blank");
-
-/* bottom nav sheets (prototype placeholders) */
-function setNavActive(btn){
-  ['navPlay','navMap','navLineage','navTop'].forEach(id=>document.getElementById(id).classList.remove('active'));
-  btn.classList.add('active');
-}
-document.getElementById('navPlay').onclick = ()=>{ setNavActive(document.getElementById('navPlay')); modal.classList.remove('active'); };
-document.getElementById('navMap').onclick = ()=>{
-  setNavActive(document.getElementById('navMap'));
-  openModal("WORLD MAP (prototype)", `
-    <div class="tiny">
-      Тут будет реальная карта распространения: страны по порядку, скорость, “нулевой пациент” в каждой стране.
-      Для этого нужен бэкенд (позже). Сейчас — интерфейс/вайб.
-    </div>
-    <div class="panel2" style="padding:14px;border-radius:22px;margin-top:10px">
-      <div class="label">Example timeline</div>
-      <div class="mono" style="margin-top:10px;opacity:.9">AT → DE → IT → FR → …</div>
-      <div class="tiny" style="margin-top:10px">Сделаем как “эпидемия на карте” — супер кликабельно.</div>
-    </div>
-  `);
-};
-document.getElementById('navLineage').onclick = ()=>{
-  setNavActive(document.getElementById('navLineage'));
-  const by = localStorage.getItem(LS.by) || '------';
-  openModal("CHAIN (prototype)", `
-    <div class="tiny">Тут будет полная цепочка заражений. Сейчас — кто тебя заразил.</div>
-    <div class="panel2" style="padding:14px;border-radius:22px;margin-top:10px">
-      <div class="label">INFECTED BY</div>
-      <div class="mono" style="margin-top:10px;font-size:22px;font-weight:950">#${by}</div>
-    </div>
-    <div class="tiny" style="margin-top:10px">
-      С бэкендом: покажем дерево цепочек и “кто кого”, чтобы люди реально гриндили “быть источником”.
-    </div>
-  `);
-};
-document.getElementById('navTop').onclick = ()=>{
-  setNavActive(document.getElementById('navTop'));
-  openModal("TOP (prototype)", `
-    <div class="tiny">Ежемесячный топ по заражениям + турниры. Сейчас — мок-данные.</div>
-    <div class="panel2" style="padding:14px;border-radius:22px;margin-top:10px">
-      <div class="row" style="justify-content:space-between">
-        <div class="mono" style="font-weight:950">#1  INFECTED #000120</div>
-        <div class="mono" style="opacity:.85">184</div>
-      </div>
-      <div class="row" style="justify-content:space-between;margin-top:10px">
-        <div class="mono" style="font-weight:950">#2  INFECTED #000381</div>
-        <div class="mono" style="opacity:.85">152</div>
-      </div>
-      <div class="row" style="justify-content:space-between;margin-top:10px">
-        <div class="mono" style="font-weight:950">#3  INFECTED #000905</div>
-        <div class="mono" style="opacity:.85">99</div>
-      </div>
-    </div>
-  `);
-};
-
-/* ----------------------------- GAME: 3-lane swipe runner ----------------------------- */
-const canvasWrap=document.getElementById('canvasWrap');
-const canvas=document.getElementById('gameCanvas');
-const ctx=canvas.getContext('2d');
-
-const hudTime=document.getElementById('hudTime');
-const hudScore=document.getElementById('hudScore');
-const hudMulti=document.getElementById('hudMulti');
-const hudHearts=document.getElementById('hudHearts');
-const panicFill=document.getElementById('panicFill');
-const hudTip=document.getElementById('hudTip');
-
-let running=false, raf=0, last=0;
-
-let timeLeft=25;
-let score=0;
-let multi=1.0;
-let combo=0;
-let greens=0;
-let hp=3;
-let panic=0.12;
-
-let lane=1; // 0..2
-let shield=0; // seconds
-let slow=0;   // seconds
-
-let spawnT=0;
-let items=[]; // {lane,y,kind} kind: 'g' green, 'r' red, 's' shield, 't' time/slow
-let particles=[];
-
-function resizeCanvas(){
-  const rect=canvasWrap.getBoundingClientRect();
-  const dpr=Math.min(2, window.devicePixelRatio||1);
-  canvas.width=Math.floor(rect.width*dpr);
-  canvas.height=Math.floor(rect.height*dpr);
-  canvas.style.width=rect.width+"px";
-  canvas.style.height=rect.height+"px";
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-}
-
-function lanesX(w){
-  return [w*0.25, w*0.50, w*0.75];
-}
-
-function setHeartsUI(){
-  hudHearts.innerHTML='';
-  for(let i=0;i<3;i++){
-    const d=document.createElement('div');
-    d.className='heart' + (i < hp ? ' on' : '');
-    hudHearts.appendChild(d);
-  }
-}
-
-function updateTimeUI(){
-  const t=Math.max(0, Math.ceil(timeLeft));
-  hudTime.textContent = `00:${String(t).padStart(2,'0')}`;
-}
-
-function clamp(n,a,b){return Math.max(a, Math.min(b,n));}
-function rand(a,b){return a+Math.random()*(b-a);}
-
-function burst(x,y,color){
-  for(let i=0;i<14;i++){
-    const a=Math.random()*Math.PI*2;
-    const sp=rand(80,260);
-    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:rand(.14,.30),c:color});
-  }
-}
-
-function resetRun(){
-  timeLeft=25;
-  score=0; multi=1.0; combo=0; greens=0;
-  hp=3; panic=0.12; lane=1;
-  shield=0; slow=0;
-  spawnT=0;
-  items=[]; particles=[];
-  hudScore.textContent='0';
-  hudMulti.textContent='1.0x';
-  panicFill.style.width='0%';
-  setHeartsUI();
-  updateTimeUI();
-  resizeCanvas();
-}
-
-function spawn(){
-  // chance based on difficulty
-  // mostly greens + reds, sometimes powerups
-  const r=Math.random();
-  let kind='g';
-  if(r < 0.28) kind='r';
-  else if(r < 0.31) kind='s';   // shield
-  else if(r < 0.34) kind='t';   // slow
-  const ln=(Math.random()*3)|0;
-  items.push({lane:ln, y:-40, kind});
-}
-
-function startGame(){
-  show('game');
-  resetRun();
-  running=true;
-  last=performance.now();
-  raf=requestAnimationFrame(loop);
-}
-
-function endGame(){
-  running=false;
-  cancelAnimationFrame(raf);
-
-  // XP reward from score
-  addXP(Math.floor(score/3));
-
-  // streak logic: if survived full time with hp>0 => streak++
-  const completed = (timeLeft <= 0 && hp > 0);
-  let streak=getStreak();
-  if(completed) streak += 1;
-  else streak = 0;
-  setStreak(streak);
-
-  const best=parseInt(localStorage.getItem(LS.best)||'0',10);
-  const newBest=Math.max(best, score);
-  localStorage.setItem(LS.best, String(newBest));
-
-  const id=getOrCreateId();
-  document.getElementById('resScore').textContent=String(score);
-  document.getElementById('resBest').textContent=String(newBest);
-  document.getElementById('resLink').textContent=infectLink(id);
-
-  document.getElementById('resBonus').textContent = `Greens: ${greens} • Max combo: x${Math.floor(multi*10)/10}`;
-  document.getElementById('resStreak').textContent = `Streak: ${getStreak()} • Lvl: ${levelFromXP(getXP())}`;
-
-  // update missions
-  applyMissionsAfterRun({score, greens, multi, survived: completed ? 25 : (25 - Math.max(0,timeLeft))});
-
-  // generate share card
-  generateShareCard({id, score, best:newBest, country:getCountry(), streak:getStreak(), lvl:levelFromXP(getXP())});
-
-  updateHomeUI();
-  show('result');
-}
-
-function applyMissionsAfterRun(run){
-  const arr=loadMissions();
-  let changed=false;
-  arr.forEach(m=>{
-    if(m.done) return;
-    if(m.type==='greens'){
-      m.progress = clamp(m.progress + run.greens, 0, m.target);
-    }else if(m.type==='combo'){
-      // multi is like 1.0..3.0 ; convert to combo-ish
-      const cm = Math.floor(run.multi*10)/10;
-      m.progress = Math.max(m.progress, Math.floor(cm));
-    }else if(m.type==='survive'){
-      m.progress = Math.max(m.progress, Math.floor(run.survived));
-    }else if(m.type==='score'){
-      m.progress = Math.max(m.progress, run.score);
+  // ---- MAIN ACTIONS ----
+  $("#copy").onclick = async ()=>{
+    const ok = await copy(link(getId()));
+    if(ok){ spreads(1); render(); }
+  };
+  $("#share").onclick = async ()=>{
+    const url = link(getId());
+    spreads(1); render();
+    if(navigator.share){
+      try{ await navigator.share({ title:"ZOMBIEGLOBAL", text:"Beat me. Enter via my link.", url }); }catch(e){}
+    }else{
+      await copy(url);
     }
-    if(m.progress >= m.target){
-      m.done=true;
+  };
+
+  $("#tgCh").onclick = ()=> open(TG_CH, "_blank");
+  $("#tgBot").onclick = ()=> open(TG_BOT, "_blank");
+
+  $("#reset").onclick = ()=>{
+    if(confirm("Reset local progress?")){
+      localStorage.removeItem(LS.id);
+      localStorage.removeItem(LS.by);
+      localStorage.removeItem(LS.spreads);
+      location.href = base();
     }
-    changed=true;
-  });
-  if(changed) saveMissions(arr);
-}
+  };
 
-function loop(now){
-  const rawDt=Math.min(0.033, (now-last)/1000);
-  last=now;
+  // placeholders (пока без портянок и без игры — только UI)
+  const soon = (t)=>alert(t + " — подключим на следующем шаге (без мусорного кода).");
+  $("#actTop").onclick = ()=> soon("MONTH TOP");
+  $("#actMap").onclick = ()=> soon("WORLD MAP");
+  $("#actPlay").onclick = ()=> soon("PLAY MODE");
+  $("#goTop").onclick  = ()=> soon("MONTH TOP");
+  $("#goMap").onclick  = ()=> soon("WORLD MAP");
+  $("#goPlay").onclick = ()=> soon("PLAY MODE");
 
-  // slow effect
-  const slowFactor = slow > 0 ? 0.6 : 1.0;
-  const dt = rawDt * slowFactor;
-
-  timeLeft -= dt;
-  spawnT += dt;
-
-  // panic increases over time + when damage
-  panic = clamp(panic + dt*0.007, 0, 1);
-
-  if(shield>0) shield = Math.max(0, shield - dt);
-  if(slow>0) slow = Math.max(0, slow - dt);
-
-  // spawn rate ramps up
-  const difficulty = 1 - (timeLeft/25);
-  const interval = 0.36 - difficulty*0.13; // 0.36 -> 0.23
-  while(spawnT >= interval){
-    spawnT -= interval;
-    spawn();
-  }
-
-  // move items
-  const rect=canvasWrap.getBoundingClientRect();
-  const h=rect.height, w=rect.width;
-  const speed = (260 + difficulty*260) * (slow>0 ? 0.55 : 1.0);
-
-  for(const it of items){
-    it.y += speed * dt;
-  }
-  // remove out of screen (miss)
-  items = items.filter(it => it.y < h + 60);
-
-  // collisions: player at bottom
-  const px = lanesX(w)[lane];
-  const py = h*0.80;
-  for(let i=items.length-1;i>=0;i--){
-    const it=items[i];
-    const ix = lanesX(w)[it.lane];
-    const iy = it.y;
-    const dx = ix - px;
-    const dy = iy - py;
-    const rr = 34; // hit radius
-    if(dx*dx + dy*dy <= rr*rr){
-      if(it.kind==='g'){
-        greens++;
-        combo++;
-        // multi grows with combo
-        multi = clamp(1 + combo*0.06, 1, 3.0);
-        score += Math.floor(10 * multi);
-        panic = clamp(panic - 0.12, 0, 1);
-        burst(ix,iy,'rgba(69,255,117,1)');
-      }else if(it.kind==='r'){
-        if(shield>0){
-          // shield absorbs
-          burst(ix,iy,'rgba(47,169,255,1)');
-        }else{
-          hp -= 1;
-          setHeartsUI();
-          combo = 0;
-          multi = 1.0;
-          panic = clamp(panic + 0.22, 0, 1);
-          burst(ix,iy,'rgba(255,61,77,1)');
-        }
-      }else if(it.kind==='s'){
-        shield = 3.5; // seconds
-        burst(ix,iy,'rgba(47,169,255,1)');
-      }else if(it.kind==='t'){
-        slow = 3.2; // seconds
-        burst(ix,iy,'rgba(255,211,74,1)');
-      }
-      items.splice(i,1);
-    }
-  }
-
-  // particles
-  for(const p of particles){
-    p.x += p.vx*dt; p.y += p.vy*dt; p.life -= dt;
-    p.vx *= (1 - dt*10); p.vy *= (1 - dt*10);
-  }
-  particles = particles.filter(p=>p.life>0);
-
-  // UI
-  hudScore.textContent=String(score);
-  hudMulti.textContent = `${(Math.floor(multi*10)/10).toFixed(1)}x`;
-  panicFill.style.width = `${Math.floor(panic*100)}%`;
-  updateTimeUI();
-
-  // tip
-  if(shield>0) hudTip.textContent = `Shield ON (${shield.toFixed(1)}s) • Swipe lanes • Avoid RED`;
-  else if(slow>0) hudTip.textContent = `SLOW TIME (${slow.toFixed(1)}s) • Stack combo • Push score`;
-  else hudTip.textContent = `Swipe ◀ / ▶ to change lane • GREEN = combo • RED = damage`;
-
-  render(w,h,px,py);
-
-  // end conditions
-  if(hp<=0 || panic>=1){
-    endGame();
-    return;
-  }
-  if(timeLeft <= 0){
-    timeLeft = 0;
-    endGame();
-    return;
-  }
-  raf=requestAnimationFrame(loop);
-}
-
-function render(w,h,px,py){
-  ctx.clearRect(0,0,w,h);
-
-  // ambient glow
-  const g=ctx.createRadialGradient(w*.5,h*.2,80,w*.5,h*.6,Math.max(w,h)*.85);
-  g.addColorStop(0,'rgba(47,169,255,0.10)');
-  g.addColorStop(1,'rgba(0,0,0,0.78)');
-  ctx.fillStyle=g;
-  ctx.fillRect(0,0,w,h);
-
-  // lane lines
-  ctx.strokeStyle='rgba(255,255,255,0.07)';
-  ctx.lineWidth=1;
-  ctx.beginPath();
-  ctx.moveTo(w*0.33, 0); ctx.lineTo(w*0.33, h);
-  ctx.moveTo(w*0.66, 0); ctx.lineTo(w*0.66, h);
-  ctx.stroke();
-
-  // items
-  const xs = lanesX(w);
-  for(const it of items){
-    const x=xs[it.lane], y=it.y;
-    let fill='rgba(69,255,117,0.14)', stroke='rgba(69,255,117,0.62)';
-    if(it.kind==='r'){ fill='rgba(255,61,77,0.14)'; stroke='rgba(255,61,77,0.62)'; }
-    if(it.kind==='s'){ fill='rgba(47,169,255,0.14)'; stroke='rgba(47,169,255,0.62)'; }
-    if(it.kind==='t'){ fill='rgba(255,211,74,0.14)'; stroke='rgba(255,211,74,0.70)'; }
-
-    ctx.beginPath();
-    ctx.arc(x,y,16,0,Math.PI*2);
-    ctx.fillStyle=fill; ctx.fill();
-    ctx.lineWidth=2; ctx.strokeStyle=stroke; ctx.stroke();
-  }
-
-  // particles
-  for(const p of particles){
-    ctx.globalAlpha = Math.max(0, p.life*3.2);
-    ctx.fillStyle = p.c;
-    ctx.fillRect(p.x-1.5, p.y-1.5, 3, 3);
-    ctx.globalAlpha = 1;
-  }
-
-  // player
-  ctx.beginPath();
-  ctx.arc(px,py,22,0,Math.PI*2);
-  ctx.fillStyle='rgba(234,247,241,0.10)';
-  ctx.fill();
-  ctx.lineWidth=2;
-  ctx.strokeStyle = shield>0 ? 'rgba(47,169,255,0.75)' : 'rgba(234,247,241,0.34)';
-  ctx.stroke();
-
-  // lane indicator
-  ctx.fillStyle='rgba(234,247,241,0.10)';
-  ctx.fillRect(px-36, py+28, 72, 6);
-}
-
-/* Controls: swipe + tap zones */
-function moveLane(dir){
-  lane = clamp(lane + dir, 0, 2);
-}
-
-let touchStartX=0;
-let swiping=false;
-
-canvasWrap.addEventListener('touchstart', (e)=>{
-  e.preventDefault();
-  touchStartX = e.touches[0].clientX;
-  swiping=true;
-},{passive:false});
-
-canvasWrap.addEventListener('touchmove', (e)=>{
-  e.preventDefault();
-  if(!swiping) return;
-  const x = e.touches[0].clientX;
-  const dx = x - touchStartX;
-  if(Math.abs(dx) > 28){
-    moveLane(dx>0 ? +1 : -1);
-    touchStartX = x;
-  }
-},{passive:false});
-
-canvasWrap.addEventListener('touchend', ()=>{ swiping=false; });
-
-document.getElementById('tapLeft').onclick = ()=> moveLane(-1);
-document.getElementById('tapRight').onclick = ()=> moveLane(+1);
-
-/* Quit */
-document.getElementById('quit').onclick = ()=>{
-  running=false;
-  cancelAnimationFrame(raf);
-  show('home');
-  updateHomeUI();
-};
-
-/* Play */
-document.getElementById('play').onclick = ()=> startGame();
-
-/* Result actions */
-document.getElementById('retry').onclick = ()=> startGame();
-document.getElementById('back').onclick = ()=>{ show('home'); updateHomeUI(); };
-
-document.getElementById('copyRes').onclick = async ()=>{
-  const id=getOrCreateId();
-  const ok = await copyText(infectLink(id));
-  if(ok){ addSpreads(1); updateHomeUI(); }
-};
-document.getElementById('downloadCard').onclick = ()=> downloadShareCard();
-
-/* ----------------------------- SHARE CARD (9:16) ----------------------------- */
-const shareCanvas=document.getElementById('shareCanvas');
-const sctx=shareCanvas.getContext('2d');
-
-function generateShareCard(data){
-  const {id, score, best, country, streak, lvl} = data;
-  const W=shareCanvas.width, H=shareCanvas.height;
-
-  // bg
-  const bg=sctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,'#070B12');
-  bg.addColorStop(1,'#04050A');
-  sctx.fillStyle=bg;
-  sctx.fillRect(0,0,W,H);
-
-  // glow
-  const rg=sctx.createRadialGradient(W*0.50,H*0.20,60,W*0.50,H*0.30,900);
-  rg.addColorStop(0,'rgba(69,255,117,0.18)');
-  rg.addColorStop(1,'rgba(0,0,0,0)');
-  sctx.fillStyle=rg;
-  sctx.fillRect(0,0,W,H);
-
-  // title
-  sctx.fillStyle='rgba(234,247,241,0.92)';
-  sctx.font='900 70px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-  sctx.fillText('ZOMBIEGLOBAL', 80, 150);
-
-  sctx.fillStyle='rgba(234,247,241,0.70)';
-  sctx.font='900 28px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-  sctx.fillText(`INFECTED #${id}  •  ${country}  •  LVL ${lvl}`, 80, 210);
-
-  // score
-  sctx.fillStyle='rgba(69,255,117,0.92)';
-  sctx.font='950 180px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-  sctx.fillText(String(score), 80, 450);
-
-  sctx.fillStyle='rgba(234,247,241,0.72)';
-  sctx.font='900 30px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-  sctx.fillText('RUN SCORE', 80, 505);
-
-  // best + streak
-  sctx.fillStyle='rgba(47,169,255,0.92)';
-  sctx.font='900 44px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-  sctx.fillText(`BEST: ${best}`, 80, 580);
-
-  sctx.fillStyle='rgba(255,211,74,0.92)';
-  sctx.fillText(`STREAK: ${streak}`, 80, 640);
-
-  // hook line
-  sctx.fillStyle='rgba(234,247,241,0.65)';
-  sctx.font='900 30px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-  sctx.fillText('BEAT MY SCORE. ENTER VIA MY LINK.', 80, 760);
-
-  // link
-  const link=infectLink(id);
-  sctx.fillStyle='rgba(234,247,241,0.60)';
-  sctx.font='900 28px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-  wrapText(sctx, link, 80, 1580, 920, 34);
-
-  sctx.fillStyle='rgba(234,247,241,0.58)';
-  sctx.font='900 24px system-ui, -apple-system, Segoe UI, Roboto, Arial';
-  sctx.fillText('THE VIRUS IS THE LINK • SHARE IT', 80, 1730);
-}
-
-function wrapText(ctx, text, x, y, maxWidth, lineHeight){
-  const words = text.split(' ');
-  let line = '';
-  for (let n=0;n<words.length;n++){
-    const testLine = line + words[n] + ' ';
-    if (ctx.measureText(testLine).width > maxWidth && n>0){
-      ctx.fillText(line, x, y);
-      line = words[n] + ' ';
-      y += lineHeight;
-    } else {
-      line = testLine;
-    }
-  }
-  ctx.fillText(line, x, y);
-}
-
-function downloadShareCard(){
-  const url=shareCanvas.toDataURL('image/png');
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=`zombieglobal_${getOrCreateId()}_score.png`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-/* ----------------------------- INIT ----------------------------- */
-loadMissions();
-initRef();
-updateHomeUI();
-
-/* ----------------------------- RESULT SCREEN NAV ----------------------------- */
-function setNavDefaults(){
-  document.getElementById('navPlay').classList.add('active');
-  document.getElementById('navMap').classList.remove('active');
-  document.getElementById('navLineage').classList.remove('active');
-  document.getElementById('navTop').classList.remove('active');
-}
-setNavDefaults();
+  // init
+  initRef();
 </script>
 </body>
 </html>
