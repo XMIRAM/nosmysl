@@ -1,10 +1,12 @@
-const CACHE = "viral-arcade-v2";
+const CACHE = "vlz-v1";
 const CORE = [
   "./",
   "./index.html",
   "./styles.css",
   "./game.js",
-  "./manifest.webmanifest"
+  "./manifest.webmanifest",
+  "./assets/intro.mp4",
+  "./assets/bg.mp4"
 ];
 
 self.addEventListener("install", (e) => {
@@ -18,14 +20,6 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  const url = new URL(e.request.url);
-
-  // do not hard-cache video forever; just network-first
-  if (url.pathname.includes("/assets/intro.mp4")) {
-    e.respondWith(fetch(e.request).catch(() => caches.match("./index.html")));
-    return;
-  }
-
   e.respondWith(
     caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
       const copy = res.clone();
