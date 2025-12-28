@@ -1,129 +1,61 @@
-/* Global Reset and Base Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
-}
-
-body {
-    background: #121212; /* Dark mode base */
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    overflow: hidden;
-    transition: background 0.3s ease;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* Container Styles with Glassmorphism */
-.intro-container, .hub-container {
-    width: 100%;
-    max-width: 400px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    text-align: center;
-    animation: fadeIn 1s ease-out;
-    transition: transform 0.3s ease;
-}
-
-.intro-container:hover, .hub-container:hover {
-    transform: translateY(-5px);
-}
-
-/* Video and Placeholder */
-#intro-video {
-    width: 100%;
-    border-radius: 10px;
-    object-fit: cover;
-}
-
-#intro-placeholder {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-}
-
-/* Buttons with Micro-Interactions */
-.action-button {
-    background: linear-gradient(135deg, #ff4081, #ff77a9);
-    border: none;
-    color: white;
-    padding: 12px 24px;
-    margin: 10px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 15px rgba(255, 64, 129, 0.5);
-}
-
-.action-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255, 64, 129, 0.7);
-}
-
-.action-button:active {
-    transform: scale(0.98);
-}
-
-/* Input Field */
-input[type="text"] {
-    width: 80%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 10px;
-    border: none;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    font-size: 1rem;
-    text-align: center;
-}
-
-/* Sections */
-.player-info p {
-    font-size: 1.1rem;
-    margin: 10px 0;
-}
-
-.mini-game-section, .leaderboard-section, .map-section {
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.3);
-}
-
-#leaderboard-list {
-    list-style: none;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Media Queries for Responsiveness */
-@media (max-width: 400px) {
-    .intro-container, .hub-container {
-        padding: 15px;
-    }
-    .action-button {
-        padding: 10px 20px;
-    }
-}
-
-/* Accessibility Enhancements */
-button:focus, input:focus {
-    outline: 2px solid #ff4081;
-    outline-offset: 2px;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Virus Game - Global Meme Infection Experiment</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Open Graph for social sharing -->
+    <meta property="og:title" content="Virus Game">
+    <meta property="og:description" content="Spread the virus and climb the global leaderboard!">
+    <meta property="og:image" content="https://yourdomain.com/og-image.jpg">
+    <meta property="og:url" content="https://yourdomain.com">
+</head>
+<body>
+    <div id="intro" class="intro-container">
+        <div class="intro-content">
+            <video autoplay muted playsinline loop id="intro-video">
+                <source src="intro.mp4" type="video/mp4">
+            </video>
+            <p id="intro-placeholder" class="hidden">Добро пожаловать в Лабораторию Вируса. Кликните, чтобы Запустить Эксперимент.</p>
+            <button id="enter-button" class="action-button">Войти в Вирус</button>
+        </div>
+    </div>
+    <div id="hub" class="hub-container hidden">
+        <header class="hub-header">
+            <h1>Вирус Хаб</h1>
+            <select id="language-select" aria-label="Выбрать язык">
+                <option value="en">English</option>
+                <option value="ru" selected>Русский</option>
+                <option value="de">Deutsch</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="ar">عربي</option>
+            </select>
+        </header>
+        <section class="player-info">
+            <p>Ваш Infection ID: <span id="infection-id" aria-live="polite"></span></p>
+            <p>Заражён от: <span id="infected-by" aria-live="polite"></span></p>
+            <input id="virus-link" type="text" readonly aria-label="Ваша персональная вирусная ссылка">
+        </section>
+        <section class="actions">
+            <button id="copy-button" class="action-button">Копировать Ссылку</button>
+            <button id="share-button" class="action-button">Поделиться</button>
+        </section>
+        <section id="mini-game" class="mini-game-section"></section>
+        <section id="leaderboard" class="leaderboard-section">
+            <h2>Топ Заражателей</h2>
+            <ul id="leaderboard-list" aria-live="polite"></ul>
+        </section>
+        <section id="world-map" class="map-section" aria-label="Мировая Карта Распространения Вируса"></section>
+        <a href="https://t.me/your_channel" target="_blank" rel="noopener noreferrer" class="tg-link">Присоединиться к Telegram Сообществу</a>
+    </div>
+    <canvas id="share-canvas" class="hidden"></canvas> <!-- Для генерации шаринг-карточек -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
