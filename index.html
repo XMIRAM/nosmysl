@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Outbreak Link</title>
+  <style>
+    :root{
+      --bg:#05070B;
+      --panel:rgba(10,14,18,.72);
+      --border:rgba(255,255,255,.12);
+      --t1:#EAF7F1;
+      --t2:rgba(234,247,241,.68);
+      --g:#45FF75;
+      --c:#2FA9FF;
+      --r:#FF3D4D;
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--t1);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    #app{position:fixed;inset:0;overflow:hidden}
+
+    /* subtle “game feel” overlay */
+    #app::before{
+      content:""; position:absolute; inset:-20px; pointer-events:none;
+      background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 1px 6px);
+      opacity:.08; mix-blend-mode:overlay;
+    }
+
+    /* ---------- SCREENS ---------- */
+    .screen{position:absolute;inset:0;display:none;align-items:center;justify-content:center}
+    .screen.active{display:flex}
+
+    /* ---------- COMMON UI ---------- */
+    .panel{
+      width:min(520px,92vw);
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:18px;
+      backdrop-filter: blur(10px);
+      box-shadow:0 22px 90px rgba(0,0,0,.55);
+    }
+    .muted{color:var(--t2);line-height:1.55;margin:10px 0 16px}
+    .col{display:flex;flex-direction:column;gap:10px}
+
+    .btn{
+      all:unset;
+      user-select:none; cursor:pointer;
+      padding:12px 14px; border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      color:var(--t1);
+      letter-spacing:.10em; text-transform:uppercase; font-weight:800;
+      backdrop-filter: blur(10px);
+      text-align:center;
+    }
+    .btn.primary{background:rgba(69,255,117,.16); border-color:rgba(69,255,117,.22)}
+    .btn.secondary{background:rgba(47,169,255,.10); border-color:rgba(47,169,255,.20)}
+    .btn.danger{background:rgba(255,61,77,.12); border-color:rgba(255,61,77,.22)}
+    .btn:active{transform:translateY(1px)}
+    .hint{margin-top:10px;color:rgba(234,247,241,.5);font-size:12px}
+
+    /* ---------- BOOT ---------- */
+    .bootWrap{width:min(520px,92vw)}
+    .logo{letter-spacing:.14em;text-transform:uppercase;font-weight:900;margin:0 0 10px}
+    .bootText{color:var(--t2);margin:0 0 16px}
+    .bar{height:10px;border-radius:999px;border:1px solid var(--border);overflow:hidden;background:rgba(255,255,255,.05)}
+    .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--g),var(--c))}
+    .tiny{margin-top:10px;color:rgba(234,247,241,.5);font-size:12px}
+
+    /* ---------- INTRO ---------- */
+    .introVideo{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      background:#000;
+      filter:saturate(1.05) contrast(1.05);
+    }
+    .introHUD{
+      position:absolute; inset:0;
+      display:flex; align-items:flex-end; justify-content:space-between;
+      padding:18px;
+      pointer-events:none;
+      gap:14px;
+    }
+    .introTag{
+      pointer-events:none;
+      max-width:min(560px,92vw);
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:14px 16px;
+      backdrop-filter: blur(10px);
+      box-shadow:0 22px 90px rgba(0,0,0,.55);
+    }
+    .tagTitle{margin:0 0 6px;letter-spacing:.12em;text-transform:uppercase;font-weight:900}
+    .tagSub{margin:0;color:var(--t2);line-height:1.45}
+    .btnRow{display:flex;gap:10px;pointer-events:auto}
+
+    /* ---------- LOBBY ---------- */
+    #lobby{align-items:stretch;justify-content:stretch}
+    .lobbyBg{
+      position:absolute; inset:0;
+      background:
+        radial-gradient(80% 60% at 50% 10%, rgba(69,255,117,.18), rgba(0,0,0,.78)),
+        url("assets/img/lobby_bg.jpg");
+      background-position:center;
+      background-size:cover;
+      background-repeat:no-repeat;
+      filter: saturate(1.05) contrast(1.05);
+    }
+    .lobbyTop{position:absolute; top:16px; left:16px; right:16px; display:flex; justify-content:flex-start; z-index:5}
+    .playerCard{
+      width:min(360px,92vw);
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:14px 14px 12px;
+      backdrop-filter: blur(10px);
+      box-shadow:0 22px 90px rgba(0,0,0,.55);
+    }
+    .pcTitle{letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:rgba(234,247,241,.78);font-size:12px}
+    .pcId{font-weight:950;font-size:28px;letter-spacing:.08em;margin:4px 0 2px}
+    .pcMeta{color:var(--t2);font-size:13px}
+    .xpBar{height:10px;border-radius:999px;border:1px solid var(--border);overflow:hidden;background:rgba(255,255,255,.05);margin-top:10px}
+    .xpFill{height:100%;background:linear-gradient(90deg,var(--g),var(--c));width:28%}
+
+    .lobbyCenter{
+      position:absolute; inset:0;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:10px; z-index:5;
+      padding:20px;
+    }
+    .btn.big{padding:16px 18px;border-radius:16px;font-size:14px}
+    .centerSub{color:var(--t2);letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+
+    .tabbar{
+      position:absolute; left:12px; right:12px; bottom:12px;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:20px;
+      display:grid;
+      grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
+      gap:8px;
+      padding:10px;
+      z-index:10;
+      backdrop-filter: blur(10px);
+      box-shadow:0 22px 90px rgba(0,0,0,.55);
+    }
+    .tab{
+      all:unset; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:6px;
+      padding:10px 8px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      user-select:none;
+      transition:transform .08s ease, background .12s ease, border-color .12s ease;
+    }
+    .tab:hover{transform:translateY(-1px)}
+    .tab:active{transform:translateY(0px)}
+    .tab img{width:22px;height:22px;opacity:.95}
+    .tab span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;color:rgba(234,247,241,.82)}
+    .tabPlay{background:rgba(69,255,117,.14);border-color:rgba(69,255,117,.25)}
+    .tab.active{background:rgba(47,169,255,.12);border-color:rgba(47,169,255,.25)}
+
+    /* ---------- LOBBY DRAWER (tab content) ---------- */
+    .drawer{
+      position:absolute;
+      left:12px; right:12px;
+      bottom:86px;
+      z-index:9;
+      display:none;
+    }
+    .drawer.active{display:block}
+    .drawerPanel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:14px;
+      backdrop-filter: blur(10px);
+      box-shadow:0 22px 90px rgba(0,0,0,.55);
+    }
+    .drawerHead{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom:10px;
+    }
+    .drawerTitle{
+      letter-spacing:.12em;text-transform:uppercase;font-weight:900;
+      margin:0;
+    }
+    .closeX{
+      all:unset; cursor:pointer;
+      width:36px;height:36px;border-radius:12px;
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      font-weight:900;
+    }
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .field{
+      width:100%;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.05);
+      padding:12px 12px;
+      color:rgba(234,247,241,.9);
+      font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .mini{font-size:12px;color:rgba(234,247,241,.58);line-height:1.5;margin:8px 0 0}
+
+    /* ---------- RUN (game) ---------- */
+    #run{align-items:stretch;justify-content:stretch}
+    .runBg{
+      position:absolute; inset:0;
+      background:radial-gradient(120% 90% at 50% 0%, rgba(47,169,255,.10), rgba(0,0,0,.86));
+    }
+    .canvasWrap{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      padding:14px;
+      z-index:2;
+      touch-action:none;
+    }
+    canvas{width:100%;height:100%;border-radius:24px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03)}
+    .runHUD{
+      position:absolute; left:16px; right:16px; top:16px;
+      z-index:5;
+      display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start; justify-content:space-between;
+    }
+    .hudChip{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:10px 12px;
+      backdrop-filter: blur(10px);
+      display:flex; gap:12px; align-items:center;
+      min-width: 220px;
+    }
+    .hudLabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(234,247,241,.62);font-weight:900}
+    .hudValue{font-size:18px;font-weight:950;letter-spacing:.04em}
+    .panicWrap{width:min(360px,92vw)}
+    .panicBar{
+      height:10px;border-radius:999px;border:1px solid var(--border);
+      overflow:hidden;background:rgba(255,255,255,.05);margin-top:8px
+    }
+    .panicFill{height:100%;width:0%;background:linear-gradient(90deg,var(--c),var(--r))}
+    .runBottom{
+      position:absolute; left:16px; right:16px; bottom:16px;
+      z-index:6; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .tip{
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.10);
+      color:rgba(234,247,241,.70);
+      border-radius:16px;
+      padding:10px 12px;
+      backdrop-filter: blur(10px);
+      font-size:12px;
+      letter-spacing:.04em;
+    }
+
+    /* ---------- RESULT ---------- */
+    #result{align-items:stretch;justify-content:stretch}
+    .resultBg{
+      position:absolute; inset:0;
+      background:radial-gradient(120% 90% at 50% 0%, rgba(69,255,117,.10), rgba(0,0,0,.88));
+    }
+    .resultWrap{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      padding:16px; z-index:5;
+    }
+    .resultGrid{
+      width:min(720px,94vw);
+      display:grid;
+      gap:12px;
+      grid-template-columns: 1fr;
+    }
+    .statRow{display:flex; gap:10px; flex-wrap:wrap}
+    .stat{
+      flex:1;
+      min-width: 220px;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:14px;
+      backdrop-filter: blur(10px);
+      box-shadow:0 22px 90px rgba(0,0,0,.55);
+    }
+    .statName{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(234,247,241,.62);font-weight:900}
+    .statVal{font-size:28px;font-weight:950;letter-spacing:.04em;margin-top:4px}
+    .resultActions{display:flex;gap:10px;flex-wrap:wrap}
+    .resultActions .btn{flex:1;min-width:220px}
+    .divider{height:1px;background:rgba(255,255,255,.10);margin:6px 0}
+    .smallNote{font-size:12px;color:rgba(234,247,241,.58);line-height:1.5}
+
+    /* mobile safe areas */
+    @supports(padding:max(0px)){
+      .introHUD{padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));}
+      .tabbar{left:max(12px, env(safe-area-inset-left));right:max(12px, env(safe-area-inset-right));bottom:max(12px, env(safe-area-inset-bottom));}
+      .drawer{left:max(12px, env(safe-area-inset-left));right:max(12px, env(safe-area-inset-right));bottom:calc(max(86px, env(safe-area-inset-bottom) + 74px));}
+      .lobbyTop{left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));top:max(16px, env(safe-area-inset-top));}
+      .runHUD{left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));top:max(16px, env(safe-area-inset-top));}
+      .runBottom{left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));bottom:max(16px, env(safe-area-inset-bottom));}
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <!-- BOOT -->
+    <div class="screen active" id="boot">
+      <div class="bootWrap">
+        <h1 class="logo">OUTBREAK LINK</h1>
+        <p class="bootText">Initializing Outbreak Protocol…</p>
+        <div class="bar"><div class="fill" id="bootFill"></div></div>
+        <div class="tiny">v0.2 local build • prototype run loop</div>
+      </div>
+    </div>
+
+    <!-- INTRO -->
+    <div class="screen" id="intro">
+      <video class="introVideo" id="introVideo" playsinline muted autoplay></video>
+      <div class="introHUD">
+        <div class="introTag">
+          <div class="tagTitle">This virus infects a link.</div>
+          <p class="tagSub">Get your Infection ID. Spread it. Climb the monthly ranking.</p>
+        </div>
+        <div class="btnRow">
+          <button class="btn" id="skipBtn">SKIP</button>
+          <button class="btn primary" id="enterBtn">ENTER</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="screen" id="login">
+      <div class="panel">
+        <h2 style="letter-spacing:.12em;text-transform:uppercase;margin:0">Continue</h2>
+        <p class="muted">Sign in to save your Infection ID, chain, and season rank.</p>
+        <div class="col">
+          <button class="btn secondary" id="googleBtn">Google (later)</button>
+          <button class="btn secondary" id="tgBtn">Telegram (later)</button>
+          <button class="btn primary" id="guestBtn">Guest</button>
+        </div>
+        <div class="hint">Prototype login. Next step: real auth + backend.</div>
+      </div>
+    </div>
+
+    <!-- LOBBY -->
+    <div class="screen" id="lobby">
+      <div class="lobbyBg"></div>
+
+      <div class="lobbyTop">
+        <div class="playerCard">
+          <div class="pcTitle">INFECTED</div>
+          <div class="pcId" id="uiId">#------</div>
+          <div class="pcMeta">
+            <span id="uiCountry">--</span> • <span id="uiRank">Season Rank: #—</span>
+          </div>
+          <div class="xpBar"><div class="xpFill" id="xpFill"></div></div>
+        </div>
+      </div>
+
+      <div class="lobbyCenter">
+        <button class="btn primary big" id="playBtn">PLAY RUN</button>
+        <div class="centerSub">45 seconds. Contain the outbreak.</div>
+      </div>
+
+      <!-- tab content drawer -->
+      <div class="drawer" id="drawer">
+        <div class="drawerPanel">
+          <div class="drawerHead">
+            <h3 class="drawerTitle" id="drawerTitle">INFECT</h3>
+            <button class="closeX" id="drawerClose">✕</button>
+          </div>
+          <div id="drawerBody"></div>
+        </div>
+      </div>
+
+      <!-- tab bar -->
+      <div class="tabbar">
+        <button class="tab" id="tab_infect" data-tab="infect">
+          <img src="assets/ui/icon_infect.png" alt="">
+          <span>INFECT</span>
+        </button>
+        <button class="tab" id="tab_world" data-tab="world">
+          <img src="assets/ui/icon_world.png" alt="">
+          <span>WORLD</span>
+        </button>
+        <button class="tab tabPlay" id="tab_play" data-tab="play">
+          <img src="assets/ui/icon_play.png" alt="">
+          <span>PLAY</span>
+        </button>
+        <button class="tab" id="tab_lineage" data-tab="lineage">
+          <img src="assets/ui/icon_lineage.png" alt="">
+          <span>LINEAGE</span>
+        </button>
+        <button class="tab" id="tab_top" data-tab="top">
+          <img src="assets/ui/icon_top.png" alt="">
+          <span>TOP</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- RUN -->
+    <div class="screen" id="run">
+      <div class="runBg"></div>
+
+      <div class="runHUD">
+        <div class="hudChip">
+          <div>
+            <div class="hudLabel">TIME</div>
+            <div class="hudValue" id="hudTime">00:45</div>
+          </div>
+          <div>
+            <div class="hudLabel">SCORE</div>
+            <div class="hudValue" id="hudScore">0</div>
+          </div>
+          <div>
+            <div class="hudLabel">COMBO</div>
+            <div class="hudValue" id="hudCombo">0x</div>
+          </div>
+        </div>
+
+        <div class="hudChip panicWrap">
+          <div style="flex:1">
+            <div class="hudLabel">PANIC</div>
+            <div class="panicBar"><div class="panicFill" id="panicFill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="canvasWrap" id="canvasWrap">
+        <canvas id="gameCanvas" width="900" height="520"></canvas>
+      </div>
+
+      <div class="runBottom">
+        <div class="tip">Move your cursor/finger. Collect GREEN. Avoid RED. Keep combo.</div>
+        <button class="btn danger" id="runQuit">QUIT</button>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="screen" id="result">
+      <div class="resultBg"></div>
+      <div class="resultWrap">
+        <div class="resultGrid">
+          <div class="statRow">
+            <div class="stat">
+              <div class="statName">RUN SCORE</div>
+              <div class="statVal" id="resScore">0</div>
+            </div>
+            <div class="stat">
+              <div class="statName">BEST SCORE</div>
+              <div class="statVal" id="resBest">0</div>
+            </div>
+          </div>
+
+          <div class="stat">
+            <div class="statName">YOUR INFECTION LINK</div>
+            <div class="divider"></div>
+            <div class="field" id="resLink">—</div>
+            <div class="resultActions" style="margin-top:10px">
+              <button class="btn primary" id="resCopy">COPY LINK</button>
+              <button class="btn secondary" id="resShare">SHARE</button>
+            </div>
+            <div class="smallNote">Infection counts and monthly ranking become real after backend.</div>
+          </div>
+
+          <div class="resultActions">
+            <button class="btn primary" id="resRetry">RETRY</button>
+            <button class="btn secondary" id="resBack">BACK TO LOBBY</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ------------------ ROUTER ------------------
+    const screens = {
+      boot:   document.getElementById('boot'),
+      intro:  document.getElementById('intro'),
+      login:  document.getElementById('login'),
+      lobby:  document.getElementById('lobby'),
+      run:    document.getElementById('run'),
+      result: document.getElementById('result'),
+    };
+    function show(name){
+      Object.values(screens).forEach(s=>s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    // ------------------ STORAGE / ID ------------------
+    const LS_ID = 'ol_id';
+    const LS_BEST = 'ol_best';
+    const LS_INFECTED_BY = 'ol_infected_by';
+    const LS_CREATOR = 'ol_creator';
+
+    function parseParams(){
+      const u = new URL(window.location.href);
+      return {
+        ref: u.searchParams.get('ref'),
+        creator: u.searchParams.get('creator')
+      };
+    }
+
+    function pad6(n){ return String(n).padStart(6,'0'); }
+
+    function getOrCreateId(){
+      const p = parseParams();
+      if (p.creator === '1') localStorage.setItem(LS_CREATOR,'1');
+      const isCreator = localStorage.getItem(LS_CREATOR) === '1';
+      if (isCreator){
+        localStorage.setItem(LS_ID, '000001');
+        return '000001';
+      }
+
+      let id = localStorage.getItem(LS_ID);
+      if (!id){
+        // random 6 digits, not "secure" (backend later). good enough for prototype.
+        id = pad6(Math.floor(100000 + Math.random()*900000));
+        localStorage.setItem(LS_ID, id);
+      }
+      return id;
+    }
+
+    function getBaseUrl(){
+      return window.location.href.split('#')[0].split('?')[0];
+    }
+    function infectLink(myId){
+      return `${getBaseUrl()}?ref=${myId}`;
+    }
+
+    function initRef(){
+      const p = parseParams();
+      if (p.ref && /^\d{6}$/.test(p.ref)){
+        // don't set infected_by to self
+        const myId = getOrCreateId();
+        if (p.ref !== myId){
+          localStorage.setItem(LS_INFECTED_BY, p.ref);
+        }
+      }
+    }
+
+    function guessCountry(){
+      // prototype only (backend later). keep stable per device
+      const key = 'ol_country';
+      let c = localStorage.getItem(key);
+      if (!c){
+        c = 'AT'; // default; backend will do real geo
+        localStorage.setItem(key,c);
+      }
+      return c;
+    }
+
+    function updateLobbyUI(){
+      const myId = getOrCreateId();
+      document.getElementById('uiId').textContent = `#${myId}`;
+      document.getElementById('uiCountry').textContent = guessCountry();
+      // fake XP fill based on last digit
+      const xp = (parseInt(myId[5],10) / 9) * 100;
+      document.getElementById('xpFill').style.width = Math.max(18, Math.min(92, xp)) + '%';
+    }
+
+    // ------------------ BOOT ------------------
+    const fill = document.getElementById('bootFill');
+    let p = 0;
+    const bootTimer = setInterval(()=>{
+      p += 8;
+      fill.style.width = Math.min(p,100) + '%';
+      if(p >= 100){
+        clearInterval(bootTimer);
+        startIntro();
+      }
+    }, 60);
+
+    // ------------------ INTRO ------------------
+    const introVideo = document.getElementById('introVideo');
+    function startIntro(){
+      initRef();
+      updateLobbyUI();
+      show('intro');
+      introVideo.src = 'assets/video/intro.mp4';
+      introVideo.addEventListener('ended', ()=> goLogin(), {once:true});
+    }
+    function goLogin(){
+      try{ introVideo.pause(); }catch(e){}
+      show('login');
+    }
+    document.getElementById('skipBtn').onclick = goLogin;
+    document.getElementById('enterBtn').onclick = goLogin;
+
+    // ------------------ LOGIN ------------------
+    document.getElementById('googleBtn').onclick = ()=> alert('Google login later (backend step).');
+    document.getElementById('tgBtn').onclick     = ()=> alert('Telegram login later (backend step).');
+    document.getElementById('guestBtn').onclick  = ()=> { updateLobbyUI(); show('lobby'); };
+
+    // ------------------ LOBBY DRAWER / TABS ------------------
+    const drawer = document.getElementById('drawer');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerBody  = document.getElementById('drawerBody');
+    const drawerClose = document.getElementById('drawerClose');
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+
+    function setActiveTab(tabName){
+      tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab === tabName));
+    }
+    function openDrawer(title, html){
+      drawerTitle.textContent = title;
+      drawerBody.innerHTML = html;
+      drawer.classList.add('active');
+    }
+    function closeDrawer(){
+      drawer.classList.remove('active');
+      setActiveTab(null);
+    }
+    drawerClose.onclick = closeDrawer;
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    function tabInfect(){
+      const myId = getOrCreateId();
+      setActiveTab('infect');
+      openDrawer('INFECT', `
+        <div class="mini">Your personal infection link (share it):</div>
+        <div class="field" id="linkField">${infectLink(myId)}</div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="copyLinkBtn">COPY LINK</button>
+          <button class="btn secondary" id="openTgBtn">OPEN TELEGRAM</button>
+        </div>
+        <div class="mini">
+          Prototype. Later: real infection count + verified season ranking.
+        </div>
+      `);
+
+      const copyBtn = document.getElementById('copyLinkBtn');
+      const openTgBtn = document.getElementById('openTgBtn');
+
+      copyBtn.onclick = async ()=>{
+        const ok = await copyText(infectLink(myId));
+        copyBtn.textContent = ok ? 'COPIED' : 'COPY MANUALLY';
+        setTimeout(()=>copyBtn.textContent='COPY LINK', 900);
+      };
+      openTgBtn.onclick = ()=> alert('Later: open your TG channel / bot link here.');
+    }
+
+    function tabWorld(){
+      setActiveTab('world');
+      openDrawer('WORLD', `
+        <div class="mini">World outbreak map + timeline (backend later).</div>
+        <div class="field">Timeline: #1 AT → #2 DE → #3 ...</div>
+        <div class="mini">Here we will show: infections/day, speed, first carrier per country.</div>
+      `);
+    }
+
+    function tabLineage(){
+      const by = localStorage.getItem('ol_infected_by') || '------';
+      setActiveTab('lineage');
+      openDrawer('LINEAGE', `
+        <div class="mini">Your infection chain (prototype).</div>
+        <div class="field">Infected by: #${by}</div>
+        <div class="field" style="margin-top:10px">Path to CREATOR: #000001 → ...</div>
+      `);
+    }
+
+    function tabTop(){
+      setActiveTab('top');
+      openDrawer('TOP', `
+        <div class="mini">Monthly season leaderboard (prototype).</div>
+        <div class="field">#1  INFECTED #000120  —  184 infections</div>
+        <div class="field" style="margin-top:8px">#2  INFECTED #000381  —  152 infections</div>
+        <div class="field" style="margin-top:8px">#3  INFECTED #000905  —  99 infections</div>
+        <div class="mini">Winners later: prize + video message in TG channel.</div>
+      `);
+    }
+
+    document.getElementById('tab_infect').onclick  = tabInfect;
+    document.getElementById('tab_world').onclick   = tabWorld;
+    document.getElementById('tab_lineage').onclick = tabLineage;
+    document.getElementById('tab_top').onclick     = tabTop;
+
+    // ------------------ RUN GAME (Containment Run) ------------------
+    const runQuit = document.getElementById('runQuit');
+    const playBtn = document.getElementById('playBtn');
+    const tabPlay = document.getElementById('tab_play');
+
+    const hudTime  = document.getElementById('hudTime');
+    const hudScore = document.getElementById('hudScore');
+    const hudCombo = document.getElementById('hudCombo');
+    const panicFill = document.getElementById('panicFill');
+
+    const canvas = document.getElementById('gameCanvas');
+    const wrap = document.getElementById('canvasWrap');
+    const ctx = canvas.getContext('2d');
+
+    let running = false;
+    let raf = 0;
+    let last = 0;
+
+    // game state
+    let timeLeft = 45;
+    let score = 0;
+    let combo = 0;
+    let panic = 0; // 0..1
+    let pointer = {x: 0, y: 0};
+    let orbs = [];
+    let spawnT = 0;
+
+    function resizeCanvas(){
+      // match actual pixel size for crispness
+      const rect = wrap.getBoundingClientRect();
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width  = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0); // draw in css pixels
+    }
+
+    function resetRun(){
+      timeLeft = 45;
+      score = 0;
+      combo = 0;
+      panic = 0.15;
+      orbs = [];
+      spawnT = 0;
+      hudScore.textContent = '0';
+      hudCombo.textContent = '0x';
+      panicFill.style.width = '0%';
+      updateTimeUI();
+    }
+
+    function updateTimeUI(){
+      const t = Math.max(0, Math.ceil(timeLeft));
+      const mm = String(Math.floor(t/60)).padStart(2,'0');
+      const ss = String(t%60).padStart(2,'0');
+      hudTime.textContent = `${mm}:${ss}`;
+    }
+
+    function rand(a,b){ return a + Math.random()*(b-a); }
+
+    function spawnOrb(){
+      // green or red
+      const isBad = Math.random() < 0.22 + (1 - timeLeft/45)*0.12; // slightly more red over time
+      const w = wrap.getBoundingClientRect().width;
+      const h = wrap.getBoundingClientRect().height;
+      const r = isBad ? rand(10,16) : rand(10,18);
+
+      const side = Math.floor(Math.random()*4);
+      let x,y,vx,vy;
+      const speed = rand(70, 120) + (1 - timeLeft/45)*90;
+
+      if (side===0){ x = -r; y = rand(0,h); vx=speed; vy=rand(-40,40); }
+      if (side===1){ x = w+r; y = rand(0,h); vx=-speed; vy=rand(-40,40); }
+      if (side===2){ x = rand(0,w); y = -r; vx=rand(-40,40); vy=speed; }
+      if (side===3){ x = rand(0,w); y = h+r; vx=rand(-40,40); vy=-speed; }
+
+      orbs.push({x,y,vx,vy,r, bad:isBad, life: 4.2});
+    }
+
+    function startRun(){
+      closeDrawer();
+      setActiveTab(null);
+      show('run');
+      resizeCanvas();
+      resetRun();
+      running = true;
+      last = performance.now();
+      raf = requestAnimationFrame(loop);
+    }
+
+    function endRun(){
+      running = false;
+      cancelAnimationFrame(raf);
+
+      // best score
+      const best = parseInt(localStorage.getItem(LS_BEST) || '0', 10);
+      const newBest = Math.max(best, score);
+      localStorage.setItem(LS_BEST, String(newBest));
+
+      // result UI
+      const myId = getOrCreateId();
+      document.getElementById('resScore').textContent = String(score);
+      document.getElementById('resBest').textContent  = String(newBest);
+      document.getElementById('resLink').textContent  = infectLink(myId);
+
+      show('result');
+    }
+
+    function loop(now){
+      const dt = Math.min(0.033, (now - last)/1000);
+      last = now;
+
+      timeLeft -= dt;
+      spawnT += dt;
+
+      // natural panic rise (forces action)
+      panic += dt * 0.010; // tune
+      panic = Math.min(1, panic);
+
+      // spawn rate increases
+      const targetInterval = 0.28 - (1 - timeLeft/45)*0.10; // 0.28 -> 0.18
+      while (spawnT >= targetInterval){
+        spawnT -= targetInterval;
+        spawnOrb();
+      }
+
+      // update orbs
+      const w = wrap.getBoundingClientRect().width;
+      const h = wrap.getBoundingClientRect().height;
+      for (const o of orbs){
+        o.x += o.vx * dt;
+        o.y += o.vy * dt;
+        o.life -= dt;
+      }
+      orbs = orbs.filter(o => o.life > 0 && o.x > -80 && o.x < w+80 && o.y > -80 && o.y < h+80);
+
+      // collisions (simple)
+      for (let i=orbs.length-1;i>=0;i--){
+        const o = orbs[i];
+        const dx = o.x - pointer.x;
+        const dy = o.y - pointer.y;
+        const d2 = dx*dx + dy*dy;
+        const rr = (o.r + 16); // pointer radius
+        if (d2 <= rr*rr){
+          if (o.bad){
+            // hit red: panic up, combo reset
+            panic = Math.min(1, panic + 0.22);
+            combo = 0;
+          } else {
+            // collect green: score up, panic down, combo up
+            combo = Math.min(99, combo + 1);
+            const mult = 1 + Math.min(2.5, combo * 0.06);
+            score += Math.floor(10 * mult);
+            panic = Math.max(0, panic - 0.16);
+          }
+          orbs.splice(i,1);
+        }
+      }
+
+      // UI
+      hudScore.textContent = String(score);
+      hudCombo.textContent = `${combo}x`;
+      panicFill.style.width = `${Math.floor(panic*100)}%`;
+      updateTimeUI();
+
+      // draw
+      render();
+
+      if (timeLeft <= 0 || panic >= 1){
+        endRun();
+        return;
+      }
+      raf = requestAnimationFrame(loop);
+    }
+
+    function render(){
+      const rect = wrap.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
+
+      ctx.clearRect(0,0,w,h);
+
+      // soft vignette
+      const g = ctx.createRadialGradient(w*0.5, h*0.3, 80, w*0.5, h*0.5, Math.max(w,h)*0.7);
+      g.addColorStop(0, 'rgba(47,169,255,0.08)');
+      g.addColorStop(1, 'rgba(0,0,0,0.60)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,w,h);
+
+      // orbs
+      for (const o of orbs){
+        ctx.beginPath();
+        ctx.arc(o.x, o.y, o.r, 0, Math.PI*2);
+        ctx.closePath();
+
+        if (o.bad){
+          ctx.fillStyle = 'rgba(255,61,77,0.16)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255,61,77,0.50)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = 'rgba(69,255,117,0.16)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(69,255,117,0.60)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+
+      // pointer
+      ctx.beginPath();
+      ctx.arc(pointer.x, pointer.y, 16, 0, Math.PI*2);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(234,247,241,0.10)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(234,247,241,0.35)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // crosshair lines
+      ctx.strokeStyle = 'rgba(234,247,241,0.18)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pointer.x - 22, pointer.y);
+      ctx.lineTo(pointer.x + 22, pointer.y);
+      ctx.moveTo(pointer.x, pointer.y - 22);
+      ctx.lineTo(pointer.x, pointer.y + 22);
+      ctx.stroke();
+    }
+
+    function setPointerFromEvent(clientX, clientY){
+      const rect = wrap.getBoundingClientRect();
+      pointer.x = Math.max(0, Math.min(rect.width,  clientX - rect.left));
+      pointer.y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+    }
+
+    wrap.addEventListener('mousemove', (e)=> setPointerFromEvent(e.clientX, e.clientY));
+    wrap.addEventListener('touchstart', (e)=>{
+      e.preventDefault();
+      const t = e.touches[0];
+      setPointerFromEvent(t.clientX, t.clientY);
+    }, {passive:false});
+    wrap.addEventListener('touchmove', (e)=>{
+      e.preventDefault();
+      const t = e.touches[0];
+      setPointerFromEvent(t.clientX, t.clientY);
+    }, {passive:false});
+
+    window.addEventListener('resize', ()=> { if (screens.run.classList.contains('active')) resizeCanvas(); });
+
+    runQuit.onclick = ()=> { running=false; cancelAnimationFrame(raf); show('lobby'); };
+
+    playBtn.onclick = startRun;
+    tabPlay.onclick = startRun;
+
+    // ------------------ RESULT ACTIONS ------------------
+    document.getElementById('resRetry').onclick = startRun;
+    document.getElementById('resBack').onclick  = ()=> show('lobby');
+
+    document.getElementById('resCopy').onclick = async ()=>{
+      const myId = getOrCreateId();
+      const ok = await copyText(infectLink(myId));
+      document.getElementById('resCopy').textContent = ok ? 'COPIED' : 'COPY MANUALLY';
+      setTimeout(()=>document.getElementById('resCopy').textContent='COPY LINK', 900);
+    };
+
+    document.getElementById('resShare').onclick = async ()=>{
+      const myId = getOrCreateId();
+      const link = infectLink(myId);
+      const text = `I got INFECTED #${myId}. This virus infects a link.\n${link}`;
+      if (navigator.share){
+        try{
+          await navigator.share({title:'Outbreak Link', text, url: link});
+        }catch(e){}
+      } else {
+        const ok = await copyText(text);
+        alert(ok ? 'Share text copied.' : 'Copy link manually from the field.');
+      }
+    };
+  </script>
+</body>
+</html>
